@@ -24,7 +24,10 @@ import javax.xml.XMLConstants;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -36,58 +39,61 @@ import java.util.zip.ZipInputStream;
  */
 public class Analyzer {
 
-    private static final Logger logger = LoggerFactory.getLogger(Analyzer.class);
-    private static final String TMPFILENAME = "vi-analyzer-"+ EnFactory.getEnBase().getAppId()+new Date().getTime()+".obj";
     final static String SELFCHECKTAG = "Self-check";
+    private static final Logger logger = LoggerFactory.getLogger(Analyzer.class);
+    private static final String TMPFILENAME = "vi-analyzer-" + EnFactory.getEnBase().getAppId() + new Date().getTime() + ".obj";
+    private static final int MAXSLFCHECKCOUNT = 6;
+    private static AtomicInteger currentSlfCheckThreadCount = new AtomicInteger(0);
+
     public static PomInfo[] getAllPomInfo() throws IOException, ClassNotFoundException {
 
 
         Gson gson = new Gson();
-        File tmpFile = Paths.get(System.getProperty("java.io.tmpdir"),TMPFILENAME
+        File tmpFile = Paths.get(System.getProperty("java.io.tmpdir"), TMPFILENAME
         ).toFile();
-        if(tmpFile.exists()){
-            try(InputStream fis = new FileInputStream(tmpFile);
-                Reader reader = new InputStreamReader(fis)){
+        if (tmpFile.exists()) {
+            try (InputStream fis = new FileInputStream(tmpFile);
+                 Reader reader = new InputStreamReader(fis)) {
 
-                return gson.fromJson(reader,PomInfo[].class);
-            }catch (Throwable e){
-                logger.warn("DeSerialize pominfos failed!"+e.getMessage());
+                return gson.fromJson(reader, PomInfo[].class);
+            } catch (Throwable e) {
+                logger.warn("DeSerialize pominfos failed!" + e.getMessage());
                 return null;
             }
         }
 
         List<PomInfo> pomInfos = getAllJarPomInfo();
         pomInfos.add(0, getCurrentPomInfo());
-        try(FileOutputStream fos = new FileOutputStream(tmpFile);
-            Writer writer = new OutputStreamWriter(fos)){
+        try (FileOutputStream fos = new FileOutputStream(tmpFile);
+             Writer writer = new OutputStreamWriter(fos)) {
             gson.toJson(pomInfos, writer);
-        }catch (Throwable e){
-            logger.warn("Serialize pominfos failed!"+e.getMessage());
+        } catch (Throwable e) {
+            logger.warn("Serialize pominfos failed!" + e.getMessage());
         }
 
         return pomInfos.toArray(new PomInfo[pomInfos.size()]);
     }
 
-    public static PomInfo getCurrentPomInfo(){
+    public static PomInfo getCurrentPomInfo() {
         PomInfo jarInfo = new PomInfo();
         try {
 
             URL root = Thread.currentThread().getContextClassLoader().getResource("/");
 
-            if(root == null){
+            if (root == null) {
                 return jarInfo;
             }
             File rootF = new File(root.getFile()).getParentFile().getParentFile();
-            Path  path = Paths.get(rootF.getAbsolutePath(),"META-INF/maven");
+            Path path = Paths.get(rootF.getAbsolutePath(), "META-INF/maven");
 
 
             File file = path.toFile();
 
             File[] subFiles = file.listFiles();
 
-            if(subFiles != null) {
+            if (subFiles != null) {
                 subFiles = subFiles[0].listFiles();
-                if(subFiles != null) {
+                if (subFiles != null) {
                     File pom = subFiles[0].listFiles(new FileFilter() {
                         @Override
                         public boolean accept(File f) {
@@ -100,8 +106,8 @@ public class Analyzer {
                     }
                 }
             }
-        }catch (Throwable e){
-            logger.warn("get current jar info failed",e);
+        } catch (Throwable e) {
+            logger.warn("get current jar info failed", e);
         }
         return jarInfo;
     }
@@ -109,7 +115,7 @@ public class Analyzer {
     public static PomInfo readPom(InputStream is) throws SAXException, IOException {
 
         XMLReader xmlReader = XMLReaderFactory.createXMLReader();
-        xmlReader.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+        xmlReader.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         PomDependencyHandler handler = new PomDependencyHandler();
         xmlReader.setContentHandler(handler);
         xmlReader.parse(new InputSource(is));
@@ -122,15 +128,15 @@ public class Analyzer {
         String name = Tools.getNoExtensionName(jarName);
         Path target = Paths.get(System.getProperty("java.io.tmpdir"),
                 name + "-sources.jar");
-        if(!Files.exists(target)) {
-            try(InputStream stream = EnFactory.getEnMaven().getSourceJarByFileName(name)) {
-                if(stream != null) {
+        if (!Files.exists(target)) {
+            try (InputStream stream = EnFactory.getEnMaven().getSourceJarByFileName(name)) {
+                if (stream != null) {
                     Files.copy(stream, target);
                 }
             }
         }
 
-        if(Files.exists(target)) {
+        if (Files.exists(target)) {
             File jarFile = target.toFile();
             try (ZipFile zipFile = new ZipFile(jarFile)) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -139,7 +145,7 @@ public class Analyzer {
                     rtn.add(entry.getName());
                 }
             }
-        }else{
+        } else {
             URL realUrl = new URL(getJarLocationByName(jarName));
             //InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(jarName);
             try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
@@ -155,8 +161,8 @@ public class Analyzer {
 
     public static List<String> listJarClasses(String location) throws IOException, URISyntaxException {
         List<String> rtn = new ArrayList<>();
-        if(!location.toLowerCase().startsWith("file:")){
-           location = getJarLocationByName(location);
+        if (!location.toLowerCase().startsWith("file:")) {
+            location = getJarLocationByName(location);
         }
 
         URL realUrl = new URL(location);
@@ -166,20 +172,21 @@ public class Analyzer {
                 ZipEntry ze;
                 while ((ze = zip.getNextEntry()) != null) {
                     String name = ze.getName();
-                    if(name.endsWith(".class")) {
-                        rtn.add(name.substring(0,name.length()-6));
+                    if (name.endsWith(".class")) {
+                        rtn.add(name.substring(0, name.length() - 6));
                     }
                 }
             }
-        }else{
+        } else {
             Path p = Paths.get(realUrl.toURI());
-            listFiles(p,p.toString().length()+1,rtn);
+            listFiles(p, p.toString().length() + 1, rtn);
         }
 
         return rtn;
 
     }
-    private static void listFiles(Path path,int prefixLen,List<String> files) throws IOException {
+
+    private static void listFiles(Path path, int prefixLen, List<String> files) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
             for (Path entry : stream) {
                 if (Files.isDirectory(entry)) {
@@ -188,13 +195,11 @@ public class Analyzer {
 
                 String p = entry.toString();
                 if (p.endsWith(".class")) {
-                    files.add(p.substring(prefixLen,p.length()-6).replace('\\', '/'));
+                    files.add(p.substring(prefixLen, p.length() - 6).replace('\\', '/'));
                 }
             }
         }
     }
-
-
 
     public static Set<String> getAllJarNames() throws IOException {
 
@@ -224,18 +229,18 @@ public class Analyzer {
         String metaPath = "META-INF";
         Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(metaPath);
 
-        name = "/"+name;
+        name = "/" + name;
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
-            if (url != null){
+            if (url != null) {
                 String urlStr = url.toString();
-                if(urlStr.charAt(urlStr.length()-1)=='/'){
-                    urlStr = urlStr.substring(0,urlStr.length()-2);
+                if (urlStr.charAt(urlStr.length() - 1) == '/') {
+                    urlStr = urlStr.substring(0, urlStr.length() - 2);
                 }
                 int last = urlStr.lastIndexOf('!');
 
-                String location = urlStr.substring(urlStr.indexOf('f'),last>0?last:urlStr.lastIndexOf('/'));
-                if(location.toLowerCase().contains(name.toLowerCase())){
+                String location = urlStr.substring(urlStr.indexOf('f'), last > 0 ? last : urlStr.lastIndexOf('/'));
+                if (location.toLowerCase().contains(name.toLowerCase())) {
                     return location;
                 }
             }
@@ -246,9 +251,9 @@ public class Analyzer {
 
     }
 
-    public static Map<String,String> getAllModuleInfo() throws IOException {
+    public static Map<String, String> getAllModuleInfo() throws IOException {
 
-        Map<String,String> rtn = new TreeMap<>(new Comparator<String>() {
+        Map<String, String> rtn = new TreeMap<>(new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
                 return o1.compareTo(o2);
@@ -259,15 +264,15 @@ public class Analyzer {
 
         while (urls.hasMoreElements()) {
             URL url = urls.nextElement();
-            if (url != null){
+            if (url != null) {
                 String urlStr = url.toString();
-                if(urlStr.charAt(urlStr.length()-1)=='/'){
-                   urlStr = urlStr.substring(0,urlStr.length()-2);
+                if (urlStr.charAt(urlStr.length() - 1) == '/') {
+                    urlStr = urlStr.substring(0, urlStr.length() - 2);
                 }
                 int last = urlStr.lastIndexOf('!');
 
-                String location = urlStr.substring(urlStr.indexOf('f'),last>0?last:urlStr.lastIndexOf('/'));
-                rtn.put(new File(location).getName(),location);
+                String location = urlStr.substring(urlStr.indexOf('f'), last > 0 ? last : urlStr.lastIndexOf('/'));
+                rtn.put(new File(location).getName(), location);
             }
         }
 
@@ -284,47 +289,47 @@ public class Analyzer {
             URL url = urls.nextElement();
             if (url != null && "jar".equals(url.getProtocol())) {
                 String urlStr = url.toString();
-                String location = urlStr.substring(urlStr.indexOf('f'),urlStr.lastIndexOf('!'));
+                String location = urlStr.substring(urlStr.indexOf('f'), urlStr.lastIndexOf('!'));
 
                 Properties properties = new Properties();
                 URL realUrl = new URL(location);
-                try ( ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
+                try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
                     long jarSize = Files.size(Paths.get(realUrl.toURI()));
                     ZipEntry ze;
                     PomInfo pomInfo = null;
-                    boolean hasPom =false;
+                    boolean hasPom = false;
                     while ((ze = zip.getNextEntry()) != null) {
                         String zePath = ze.getName();
-                        if(zePath.startsWith(metaPath+"/maven")&&zePath.endsWith("pom.xml")){
+                        if (zePath.startsWith(metaPath + "/maven") && zePath.endsWith("pom.xml")) {
                             pomInfo = readPom(zip);
-                            hasPom =true;
+                            hasPom = true;
                             break;
                         }
-                        if(zePath.equals(metaPath+"/MANIFEST.MF")){
+                        if (zePath.equals(metaPath + "/MANIFEST.MF")) {
                             properties.load(zip);
                         }
                     }
 
-                    if(!hasPom){
-                        String fName = location.substring(location.lastIndexOf('/') + 1,location.length()-4);
+                    if (!hasPom) {
+                        String fName = location.substring(location.lastIndexOf('/') + 1, location.length() - 4);
                         String[] av = PomUtil.getArtifactIdAndVersion(fName);
 
-                        if(av!=null) {
-                            if(av[1].split("-").length>2 && properties.containsKey("Specification-Version")){
+                        if (av != null) {
+                            if (av[1].split("-").length > 2 && properties.containsKey("Specification-Version")) {
                                 av[1] = properties.getProperty("Specification-Version").trim();
                             }
 
-                            try (InputStream pomStream = PomUtil.getPomInfoByFileName(av,fName)) {
+                            try (InputStream pomStream = PomUtil.getPomInfoByFileName(av, fName)) {
                                 pomInfo = readPom(pomStream);
                             }
                         }
 
-                        if(pomInfo == null) {
+                        if (pomInfo == null) {
                             pomInfo = new PomInfo();
-                            if(av!=null) {
+                            if (av != null) {
                                 pomInfo.artifactId = av[0];
                                 pomInfo.version = av[1];
-                            }else{
+                            } else {
                                 pomInfo.artifactId = fName;
                             }
 
@@ -334,43 +339,40 @@ public class Analyzer {
                     pomInfo.location = location;
                     pomInfo.size = jarSize;
                     pomInfos.add(pomInfo);
-                }catch (Throwable e){
-                    logger.warn("get jar maven pom failed! location:"+location,e);
+                } catch (Throwable e) {
+                    logger.warn("get jar maven pom failed! location:" + location, e);
                 }
             }
         }
         return pomInfos;
     }
 
-    private static AtomicInteger currentSlfCheckThreadCount = new AtomicInteger(0);
-    private static final int MAXSLFCHECKCOUNT = 6;
-
     public static String selfCheck(final String pluginId) throws NotFoundException, SizeLimitExceededException {
 
         final IgnitePlugin plugin = IgniteManager.getPluginMap().get(pluginId);
-        if(plugin == null || !(plugin instanceof AbstractIgnitePlugin)){
-            throw  new NotFoundException("ignite plugin: "+pluginId+" not found or the plugin is not extends from  AbstractIgnitePlugin!");
+        if (plugin == null || !(plugin instanceof AbstractIgnitePlugin)) {
+            throw new NotFoundException("ignite plugin: " + pluginId + " not found or the plugin is not extends from  AbstractIgnitePlugin!");
         }
 
-        if(currentSlfCheckThreadCount.get()>MAXSLFCHECKCOUNT) {
-            throw new SizeLimitExceededException("Self-check requests cannot exceed "+MAXSLFCHECKCOUNT+"!");
+        if (currentSlfCheckThreadCount.get() > MAXSLFCHECKCOUNT) {
+            throw new SizeLimitExceededException("Self-check requests cannot exceed " + MAXSLFCHECKCOUNT + "!");
         }
         final String uid = pluginId + System.currentTimeMillis();
         final IgniteManager.SimpleLogger slogger = SimpleLoggerFactory.newSimpleLogger(uid);
-        new Thread("vi-self-check"){
+        new Thread("vi-self-check") {
             @Override
             public void run() {
                 currentSlfCheckThreadCount.incrementAndGet();
                 boolean result = false;
                 try {
                     slogger.info(LogHelper.beginBlock(SELFCHECKTAG, new String[]{"pluginId", pluginId}));
-                     result = ((AbstractIgnitePlugin) plugin).selfCheck(slogger);
-                }catch (Throwable e){
-                   slogger.error("run "+uid+" self-check failed!",e);
+                    result = ((AbstractIgnitePlugin) plugin).selfCheck(slogger);
+                } catch (Throwable e) {
+                    slogger.error("run " + uid + " self-check failed!", e);
                 } finally {
-                    slogger.info(pluginId+" self check "+(result?"success":"failed")+"!");
-                    slogger.info(LogHelper.endBlock(SELFCHECKTAG,new String[]{"isPass",String.valueOf(result)}));
-                    slogger.info(MagicWord.CHECKEND+result);
+                    slogger.info(pluginId + " self check " + (result ? "success" : "failed") + "!");
+                    slogger.info(LogHelper.endBlock(SELFCHECKTAG, new String[]{"isPass", String.valueOf(result)}));
+                    slogger.info(MagicWord.CHECKEND + result);
                     try {
                         Thread.sleep(7000);
                     } catch (InterruptedException e) {

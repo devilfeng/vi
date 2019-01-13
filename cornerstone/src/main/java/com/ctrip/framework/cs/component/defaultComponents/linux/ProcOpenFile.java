@@ -17,18 +17,16 @@ import java.util.List;
  * Created by jiang.j on 2017/1/5.
  */
 
-@ComponentStatus(id="vi.linux.openfiles",name="open files info",description = "应用打开文件列表",list = true,auto = false)
+@ComponentStatus(id = "vi.linux.openfiles", name = "open files info", description = "应用打开文件列表", list = true, auto = false)
 public class ProcOpenFile {
 
-    @FieldInfo(name = "file name",description = "文件名")
-    public String name;
-    @FieldInfo(name = "file size",description = "文件大小",type = FieldInfo.FieldType.Bytes)
-    public long size;
-    @FieldInfo(name = "file path",description = "文件路径")
-    public String path;
-
-
     static transient Logger logger = LoggerFactory.getLogger(ProcOpenFile.class);
+    @FieldInfo(name = "file name", description = "文件名")
+    public String name;
+    @FieldInfo(name = "file size", description = "文件大小", type = FieldInfo.FieldType.Bytes)
+    public long size;
+    @FieldInfo(name = "file path", description = "文件路径")
+    public String path;
 
     public static List<ProcOpenFile> list() throws FileNotFoundException {
         final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
@@ -38,17 +36,17 @@ public class ProcOpenFile {
         List<ProcOpenFile> rtn = new ArrayList<>();
 
         File folder = new File("/proc/" + pid + "/fd");
-        if(folder.isDirectory()){
+        if (folder.isDirectory()) {
             File[] files = folder.listFiles();
-            if(files == null){
+            if (files == null) {
                 return rtn;
             }
-            for(File fd:files){
+            for (File fd : files) {
                 Path path = fd.toPath();
-                if(Files.isSymbolicLink(path)){
+                if (Files.isSymbolicLink(path)) {
                     try {
                         File real = Files.readSymbolicLink(path).toFile();
-                        if(real.isFile()) {
+                        if (real.isFile()) {
                             ProcOpenFile of = new ProcOpenFile();
                             of.name = real.getName();
                             of.size = real.length();
@@ -56,7 +54,7 @@ public class ProcOpenFile {
                             rtn.add(of);
                         }
                     } catch (Throwable e) {
-                        logger.warn("Read link:"+path.toString()+" failed!");
+                        logger.warn("Read link:" + path.toString() + " failed!");
                     }
                 }
             }

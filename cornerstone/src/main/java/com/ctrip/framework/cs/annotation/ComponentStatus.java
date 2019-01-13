@@ -16,12 +16,19 @@ public @interface ComponentStatus {
      * or type has been present.
      */
     String id();
+
     String name();
+
     String description();
+
     boolean custom() default false;
+
     boolean list() default false;
+
     boolean singleton() default false;
+
     boolean jmx() default false;
+
     boolean auto() default false;
 }
 

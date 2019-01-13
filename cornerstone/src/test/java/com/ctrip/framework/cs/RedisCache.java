@@ -9,15 +9,13 @@ import java.util.Map;
  * Created by jiang.j on 2016/5/17.
  */
 public class RedisCache implements CacheCell {
-    public class Person{
-        public String name;
-        public String des;
-    }
     private String id;
-    public RedisCache(String id){
-        this.id =id;
+
+    public RedisCache(String id) {
+        this.id = id;
 
     }
+
     @Override
     public String id() {
         return id;
@@ -30,9 +28,9 @@ public class RedisCache implements CacheCell {
 
     @Override
     public Map<String, Object> getStatus() {
-        HashMap<String,Object> rtn = new HashMap<>();
-        rtn.put("hello",id);
-        rtn.put("ni","dddd");
+        HashMap<String, Object> rtn = new HashMap<>();
+        rtn.put("hello", id);
+        rtn.put("ni", "dddd");
         return rtn;
     }
 
@@ -40,7 +38,7 @@ public class RedisCache implements CacheCell {
     public Object getByKey(String key) {
         Person p = new Person();
         p.name = "peter";
-        p.des="secret";
+        p.des = "secret";
         return p;
     }
 
@@ -49,9 +47,13 @@ public class RedisCache implements CacheCell {
         return null;
     }
 
-
     @Override
     public int size() {
         return 1;
+    }
+
+    public class Person {
+        public String name;
+        public String des;
     }
 }

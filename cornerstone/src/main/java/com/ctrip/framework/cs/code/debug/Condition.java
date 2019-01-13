@@ -11,16 +11,16 @@ import java.util.regex.Pattern;
  * Created by jiang.j on 2017/7/28.
  */
 public class Condition {
+    public static final int STRLEN = -2;
+    public static final int STREQUAL = -3;
     private final int opcode;
     private final int cmpcode;
     private final String fieldName;
     private final String desc;
     private final String value;
     private final ClassField[] classFields;
-    public static final int STRLEN = -2;
-    public static final int STREQUAL = -3;
 
-    public Condition(String fieldName,String desc,int opcode,int cmpcode,String value,ClassField[] classFields){
+    public Condition(String fieldName, String desc, int opcode, int cmpcode, String value, ClassField[] classFields) {
         this.opcode = opcode;
         this.cmpcode = cmpcode;
         this.value = value;
@@ -29,67 +29,38 @@ public class Condition {
         this.classFields = classFields;
     }
 
-    public Condition(String fieldName,String desc,int opcode,int cmpcode){
-        this(fieldName,desc,opcode,cmpcode,null,null);
+    public Condition(String fieldName, String desc, int opcode, int cmpcode) {
+        this(fieldName, desc, opcode, cmpcode, null, null);
     }
 
-    public Condition(String fieldName,String desc,int opcode,int cmpcode,String value){
-        this(fieldName,desc,opcode,cmpcode,value,null);
+    public Condition(String fieldName, String desc, int opcode, int cmpcode, String value) {
+        this(fieldName, desc, opcode, cmpcode, value, null);
     }
 
-
-    public String getName(){
-        return this.fieldName;
-    }
-    public int getOpcode(){
-
-        return this.opcode;
-    }
-
-    public int getCmpcode(){
-
-        return this.cmpcode;
-    }
-
-    public String getDesc(){
-        return this.desc;
-    }
-
-    public String getValue(){
-
-        return this.value;
-    }
-
-    public ClassField[] getClassFields(){
-        return this.classFields;
-    }
-
-
-
-    private static boolean checkHaveNullJudge(Condition previous,Condition current){
+    private static boolean checkHaveNullJudge(Condition previous, Condition current) {
 
         ClassField[] fields = current.getClassFields();
-        if(current.getCmpcode() == Opcodes.IFNULL || current.getCmpcode()==Opcodes.IFNONNULL){
+        if (current.getCmpcode() == Opcodes.IFNULL || current.getCmpcode() == Opcodes.IFNONNULL) {
             return true;
         }
-        if(previous == null){
+        if (previous == null) {
             return false;
         }
 
-        if(previous.getCmpcode()!=Opcodes.IFNULL || !previous.getName().equals(current.getName())
-                ||previous.getOpcode() != current.getOpcode()) {
+        if (previous.getCmpcode() != Opcodes.IFNULL || !previous.getName().equals(current.getName())
+                || previous.getOpcode() != current.getOpcode()) {
             return false;
-        }else if(fields!=null){
+        } else if (fields != null) {
             ClassField[] preFields = previous.getClassFields();
-            if(preFields == null || preFields.length != fields.length){
+            if (preFields == null || preFields.length != fields.length) {
                 return false;
-            }else {
+            } else {
 
-                for(int i=0;i<fields.length;i++){
+                for (int i = 0; i < fields.length; i++) {
                     ClassField item = fields[i];
                     ClassField preItem = preFields[i];
-                    if(!item.getName().equals(preItem.getName())||item.getAccess()!=preItem.getAccess()||
-                            item.getDesc()!=preItem.getDesc()){
+                    if (!item.getName().equals(preItem.getName()) || item.getAccess() != preItem.getAccess() ||
+                            item.getDesc() != preItem.getDesc()) {
                         return false;
                     }
                 }
@@ -97,38 +68,39 @@ public class Condition {
                 return true;
             }
 
-        }else{
+        } else {
             return true;
         }
     }
+
     public static Condition[] checkAndCorrect(Condition[] conditions) throws IllegalConditionException {
 
         List<Condition> rtn = new ArrayList<>();
-        Condition previousCondition=null;
-        for(Condition c:conditions){
+        Condition previousCondition = null;
+        for (Condition c : conditions) {
             String desc = c.getDesc();
             ClassField[] fields = c.getClassFields();
-            if(fields != null && fields.length>0){
-                desc = fields[fields.length-1].getDesc();
+            if (fields != null && fields.length > 0) {
+                desc = fields[fields.length - 1].getDesc();
             }
 
-            boolean isPrimitive = desc.length()==1;
+            boolean isPrimitive = desc.length() == 1;
             boolean isStr = desc.equals("Ljava/lang/String;");
             boolean isObj = !isPrimitive && !isStr;
-            if((isPrimitive && !checkPrimitiveCondition(c))
-                    ||(isStr && !checkStrCondition(c))
-                    ||(isObj && !checkObjCondition(c))) {
+            if ((isPrimitive && !checkPrimitiveCondition(c))
+                    || (isStr && !checkStrCondition(c))
+                    || (isObj && !checkObjCondition(c))) {
                 throw new IllegalConditionException();
             }
 
             int currentOpcode = c.getOpcode();
-            if(currentOpcode==Condition.STRLEN || currentOpcode == Condition.STREQUAL
-                    || (fields!=null && fields.length>0)){
-                if((isStr && previousCondition== null) || !checkHaveNullJudge(previousCondition,c)){
-                    rtn.add(new Condition(c.getName(),c.getDesc(),-1,Opcodes.IFNULL));
-                    if(fields!= null){
+            if (currentOpcode == Condition.STRLEN || currentOpcode == Condition.STREQUAL
+                    || (fields != null && fields.length > 0)) {
+                if ((isStr && previousCondition == null) || !checkHaveNullJudge(previousCondition, c)) {
+                    rtn.add(new Condition(c.getName(), c.getDesc(), -1, Opcodes.IFNULL));
+                    if (fields != null) {
                         for (int i = 0; i < fields.length; i++) {
-                            if(i!=fields.length-1 || c.getCmpcode()!=Opcodes.IFNONNULL) {
+                            if (i != fields.length - 1 || c.getCmpcode() != Opcodes.IFNONNULL) {
                                 rtn.add(new Condition(c.getName(), c.getDesc(), -1, Opcodes.IFNULL, "", Arrays.copyOf(fields, i + 1)));
                             }
 
@@ -151,14 +123,14 @@ public class Condition {
     private static boolean checkObjCondition(Condition c) {
         int op = c.getOpcode();
         int cmp = c.getCmpcode();
-        switch (op){
+        switch (op) {
             case -1:
                 break;
             default:
                 return false;
         }
 
-        switch (cmp){
+        switch (cmp) {
             case Opcodes.IFNONNULL:
             case Opcodes.IFNULL:
                 break;
@@ -173,7 +145,7 @@ public class Condition {
     private static boolean checkStrCondition(Condition c) {
         int op = c.getOpcode();
         int cmp = c.getCmpcode();
-        switch (op){
+        switch (op) {
             case -1:
             case Condition.STREQUAL:
             case Condition.STRLEN:
@@ -181,7 +153,7 @@ public class Condition {
             default:
                 return false;
         }
-        switch (cmp){
+        switch (cmp) {
             case Opcodes.IFNONNULL:
             case Opcodes.IFNULL:
             case Opcodes.IFEQ:
@@ -203,22 +175,22 @@ public class Condition {
         return true;
     }
 
-    private static boolean checkPrimitiveCondition(Condition c){
+    private static boolean checkPrimitiveCondition(Condition c) {
         int op = c.getOpcode();
         int cmp = c.getCmpcode();
         String desc = c.getDesc();
-        switch (desc){
+        switch (desc) {
             case "I":
             case "S":
             case "B":
             case "C":
-                switch (op){
+                switch (op) {
                     case -1:
                         break;
                     default:
                         return false;
                 }
-                switch (cmp){
+                switch (cmp) {
                     case Opcodes.IF_ICMPLE:
                     case Opcodes.IF_ICMPGE:
                     case Opcodes.IF_ICMPLT:
@@ -226,7 +198,7 @@ public class Condition {
                     case Opcodes.IF_ICMPNE:
                     case Opcodes.IF_ICMPEQ:
                         Pattern pattern = Pattern.compile("[0-9]+");
-                        if(!pattern.matcher(c.getValue()).matches()){
+                        if (!pattern.matcher(c.getValue()).matches()) {
                             return false;
                         }
                         break;
@@ -236,11 +208,11 @@ public class Condition {
 
                 break;
             case "F":
-                switch (op){
+                switch (op) {
                     case Opcodes.FCMPL:
                     case Opcodes.FCMPG:
                         Pattern pattern = Pattern.compile("[0-9]+(\\.[0-9]+)?");
-                        if(!pattern.matcher(c.getValue()).matches()){
+                        if (!pattern.matcher(c.getValue()).matches()) {
                             return false;
                         }
                         break;
@@ -249,11 +221,11 @@ public class Condition {
                 }
                 break;
             case "D":
-                switch (op){
+                switch (op) {
                     case Opcodes.DCMPL:
                     case Opcodes.DCMPG:
                         Pattern pattern = Pattern.compile("[0-9]+(\\.[0-9]+)?");
-                        if(!pattern.matcher(c.getValue()).matches()){
+                        if (!pattern.matcher(c.getValue()).matches()) {
                             return false;
                         }
                         break;
@@ -262,10 +234,10 @@ public class Condition {
                 }
                 break;
             case "J":
-                switch (op){
+                switch (op) {
                     case Opcodes.LCMP:
                         Pattern pattern = Pattern.compile("[0-9]+");
-                        if(!pattern.matcher(c.getValue()).matches()){
+                        if (!pattern.matcher(c.getValue()).matches()) {
                             return false;
                         }
                         break;
@@ -275,11 +247,11 @@ public class Condition {
                 break;
         }
 
-        switch (desc){
+        switch (desc) {
             case "F":
             case "D":
             case "J":
-                switch (cmp){
+                switch (cmp) {
                     case Opcodes.IFLE:
                     case Opcodes.IFLT:
                     case Opcodes.IFGE:
@@ -295,6 +267,33 @@ public class Condition {
 
 
         return true;
+    }
+
+    public String getName() {
+        return this.fieldName;
+    }
+
+    public int getOpcode() {
+
+        return this.opcode;
+    }
+
+    public int getCmpcode() {
+
+        return this.cmpcode;
+    }
+
+    public String getDesc() {
+        return this.desc;
+    }
+
+    public String getValue() {
+
+        return this.value;
+    }
+
+    public ClassField[] getClassFields() {
+        return this.classFields;
     }
 
 }

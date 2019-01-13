@@ -5,7 +5,7 @@ package com.ctrip.framework.cs.enterprise;
  */
 public class AuthenticationFailedException extends Exception {
 
-    public AuthenticationFailedException(Throwable e){
+    public AuthenticationFailedException(Throwable e) {
         super(e);
     }
 }

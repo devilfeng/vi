@@ -11,24 +11,19 @@ import static com.ctrip.framework.cs.util.Preconditions.checkNotNull;
  */
 public final class ServerCookieDecoder extends CookieDecoder {
 
-    private static final String RFC2965_VERSION = "$Version";
-
-    private static final String RFC2965_PATH = "$" + CookieHeaderNames.PATH;
-
-    private static final String RFC2965_DOMAIN = "$" + CookieHeaderNames.DOMAIN;
-
-    private static final String RFC2965_PORT = "$Port";
-
     /**
      * Strict encoder that validates that name and value chars are in the valid scope
      * defined in RFC6265
      */
     public static final ServerCookieDecoder STRICT = new ServerCookieDecoder(true);
-
     /**
      * Lax instance that doesn't validate name and value
      */
     public static final ServerCookieDecoder LAX = new ServerCookieDecoder(false);
+    private static final String RFC2965_VERSION = "$Version";
+    private static final String RFC2965_PATH = "$" + CookieHeaderNames.PATH;
+    private static final String RFC2965_DOMAIN = "$" + CookieHeaderNames.DOMAIN;
+    private static final String RFC2965_PORT = "$Port";
 
     private ServerCookieDecoder(boolean strict) {
         super(strict);
@@ -57,10 +52,11 @@ public final class ServerCookieDecoder extends CookieDecoder {
             rfc2965Style = true;
         }
 
-        loop: for (;;) {
+        loop:
+        for (; ; ) {
 
             // Skip spaces and separators.
-            for (;;) {
+            for (; ; ) {
                 if (i == headerLen) {
                     break loop;
                 }
@@ -78,7 +74,7 @@ public final class ServerCookieDecoder extends CookieDecoder {
             int valueBegin;
             int valueEnd;
 
-            for (;;) {
+            for (; ; ) {
 
                 char curChar = header.charAt(i);
                 if (curChar == ';') {

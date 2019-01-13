@@ -29,10 +29,10 @@
  */
 package com.ctrip.framework.cs.asm.tree;
 
-import java.util.Map;
-
 import com.ctrip.framework.cs.asm.Label;
 import com.ctrip.framework.cs.asm.MethodVisitor;
+
+import java.util.Map;
 
 /**
  * An {@link AbstractInsnNode} that encapsulates a {@link com.ctrip.framework.cs.asm.Label}.

@@ -13,11 +13,11 @@ import java.util.Map;
  */
 public class SampleClass {
 
-    public SampleClass(){
+    public SampleClass() {
 
         Debugger debugger = DebuggerManager.getCurrent();
-        System.out.println("current debugger "+debugger);
-        if(debugger != null) {
+        System.out.println("current debugger " + debugger);
+        if (debugger != null) {
             try {
                 debugger.triggerBreakpoint("traceid");
             } catch (Throwable e) {
@@ -25,7 +25,8 @@ public class SampleClass {
             }
         }
     }
-    public void doSome(){
+
+    public void doSome() {
         int i = 120;
         float f = 12.3f;
         short s = 100;
@@ -35,28 +36,28 @@ public class SampleClass {
         String str = "many ....";
         String nulStr = null;
         SampleInfo info;
-        info= new SampleInfo();
+        info = new SampleInfo();
         info.currentDate = new Date();
         info.isTrue = false;
         info.name = "samle info";
 
-        if(i>100){
+        if (i > 100) {
             System.out.println(i);
         }
 
-        if(str != null){
+        if (str != null) {
             System.out.println(str);
         }
 
-        if(str.length() > 10){
+        if (str.length() > 10) {
             System.out.println(str);
         }
 
-        if("many ....".equals(str)){
+        if ("many ....".equals(str)) {
             System.out.println(str);
         }
 
-        if(f<=12.3){
+        if (f <= 12.3) {
             System.out.println(f);
         }
 
@@ -64,12 +65,12 @@ public class SampleClass {
         System.out.println(i);
     }
 
-    public Map<String,Object> getDebugResult(){
+    public Map<String, Object> getDebugResult() {
 
         return DebugTool.viewCurrentTrace("traceid");
     }
 
-    public static class SampleInfo{
+    public static class SampleInfo {
         public Date currentDate;
         public boolean isTrue;
         private String name;

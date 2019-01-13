@@ -17,11 +17,11 @@ public class LinuxInfoUtilTest {
 
     @Test
     public void testAvailabeMem() throws IOException {
-        Map<String,String> meminfo = new HashMap<>();
-        meminfo.put("MemAvailable","7377708 KB");
-        meminfo.put("MemFree","400  KB");
-        meminfo.put("Buffers","  1400  KB");
-        meminfo.put("Cached","4000  KB");
+        Map<String, String> meminfo = new HashMap<>();
+        meminfo.put("MemAvailable", "7377708 KB");
+        meminfo.put("MemFree", "400  KB");
+        meminfo.put("Buffers", "  1400  KB");
+        meminfo.put("Cached", "4000  KB");
         assertEquals(7377708, LinuxInfoUtil.getAvailableMemKB(meminfo));
         meminfo.remove("MemAvailable");
         assertEquals(400 + 1400 + 4000, LinuxInfoUtil.getAvailableMemKB(meminfo));

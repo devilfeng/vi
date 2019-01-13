@@ -6,7 +6,7 @@ import com.ctrip.framework.cs.NotFoundException;
  * Created by jiang.j on 2017/3/13.
  */
 public interface Debugger {
-        /**
+    /**
      * 初始化 Debugger 实例
      */
     boolean startup();
@@ -22,7 +22,7 @@ public interface Debugger {
     boolean registerBreakpoint(final String source, final int line, final String breakpointId);
 
 
-    boolean registerBreakpoint(final String source, final int line, final String breakpointId,final String condition);
+    boolean registerBreakpoint(final String source, final int line, final String breakpointId, final String condition);
 
     /**
      * 激活一个断点，此处激活以后，后面执行中如果包含断点，就会进行 StackFrame 的记录

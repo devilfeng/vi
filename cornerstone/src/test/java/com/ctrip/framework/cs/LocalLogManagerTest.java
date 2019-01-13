@@ -19,32 +19,32 @@ public class LocalLogManagerTest {
     @Test
     public void testGetLogList() throws IOException, InitConfigurationException {
         URL url = Thread.currentThread().getContextClassLoader().getResource("test-logs/");
-        ConfigurationManager.getConfigInstance().setProperty("app.localLog.path",url.getFile());
+        ConfigurationManager.getConfigInstance().setProperty("app.localLog.path", url.getFile());
         List<LocalLogManager.FileLogInfo> logList = LocalLogManager.getLogList();
         boolean haveTestTxt = false;
         boolean haveGz = false;
-        for(LocalLogManager.FileLogInfo info:logList){
+        for (LocalLogManager.FileLogInfo info : logList) {
             String name = info.name;
             int sIndex = name.indexOf("|");
-            if(sIndex>0){
-                name = name.substring(0,sIndex);
+            if (sIndex > 0) {
+                name = name.substring(0, sIndex);
             }
             System.out.println(name);
             System.out.println(info.size);
 
-           switch (name){
-               case "test.txt":
-                   haveTestTxt = true;
-                   break;
-               case "gztest.log.gz":
-                   haveGz =true;
-                   break;
-           }
+            switch (name) {
+                case "test.txt":
+                    haveTestTxt = true;
+                    break;
+                case "gztest.log.gz":
+                    haveGz = true;
+                    break;
+            }
         }
 
 
-        assertEquals("Can't get .txt file",true,haveTestTxt);
-        assertEquals("Can't get .gz file",true,haveGz);
+        assertEquals("Can't get .txt file", true, haveTestTxt);
+        assertEquals("Can't get .gz file", true, haveGz);
 
 
     }

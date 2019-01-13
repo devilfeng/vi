@@ -15,14 +15,13 @@ public class TestServlet extends HttpServlet {
 
     @Override
     public void service(ServletRequest req, ServletResponse res)
-            throws ServletException, IOException
-    {
+            throws ServletException, IOException {
         HttpServletRequest httpReq = (HttpServletRequest) req;
         HttpServletResponse httpRes = (HttpServletResponse) res;
 
-        if(httpReq.getPathInfo().contains("abcd")){
+        if (httpReq.getPathInfo().contains("abcd")) {
 
-            httpRes.setHeader("Content-type","text/html;charset=UTF-8");
+            httpRes.setHeader("Content-type", "text/html;charset=UTF-8");
             httpRes.getOutputStream().write("it's a test!!!!!!".getBytes("UTF-8"));
         }
 

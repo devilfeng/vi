@@ -14,7 +14,15 @@ import static org.junit.Assert.assertTrue;
  */
 public class EnUITest {
 
-    public class DemoPage implements CustomPage{
+    @Test
+    public void testGetPage() {
+        DefaultEnUI enUI = (DefaultEnUI) EnFactory.getEnUI();
+        assertTrue(enUI.getMenus().size() > 0);
+        enUI.addMenu(new DemoPage());
+        assertNotNull(enUI.getPageById("ctrip-clog"));
+    }
+
+    public class DemoPage implements CustomPage {
 
         @Override
         public String getId() {
@@ -30,12 +38,5 @@ public class EnUITest {
         public String getIcon() {
             return null;
         }
-    }
-    @Test
-    public void testGetPage(){
-        DefaultEnUI enUI = (DefaultEnUI) EnFactory.getEnUI();
-        assertTrue(enUI.getMenus().size()>0);
-        enUI.addMenu(new DemoPage());
-        assertNotNull(enUI.getPageById("ctrip-clog"));
     }
 }

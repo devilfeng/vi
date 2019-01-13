@@ -3,6 +3,7 @@ package com.ctrip.framework.cs;
 import com.ctrip.framework.cs.util.IOUtils;
 import com.ctrip.framework.cs.util.TextUtils;
 import org.junit.Test;
+
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,24 +30,24 @@ public class TextUtilsTest {
     }
 
     @Test
-    public void testFormatString(){
+    public void testFormatString() {
         String raw = "abc?name=%{hello}good%dfdf&dd=%{great}";
 
-        Map<String,String> params = new HashMap<>();
-        params.put("hello","framework");
-        params.put("great","world");
+        Map<String, String> params = new HashMap<>();
+        params.put("hello", "framework");
+        params.put("great", "world");
         String expect = "abc?name=frameworkgood%dfdf&dd=world";
-        assertEquals(expect,TextUtils.formatString(raw,params));
+        assertEquals(expect, TextUtils.formatString(raw, params));
         raw = "http://ddfdf%4{df}dd?v1=%{version}&name=%{name}dd&{%}";
         expect = "http://ddfdf%4{df}dd?v1=&name=dd&{%}";
-        assertEquals(expect,TextUtils.formatString(raw,params));
-        params.put("version","1.8");
-        params.put("name","java");
+        assertEquals(expect, TextUtils.formatString(raw, params));
+        params.put("version", "1.8");
+        params.put("name", "java");
         expect = "http://ddfdf%4{df}dd?v1=1.8&name=javadd&{%}";
-        assertEquals(expect,TextUtils.formatString(raw,params));
+        assertEquals(expect, TextUtils.formatString(raw, params));
         raw = "http://ddfdf%4{df}dd?v1=%{version}&name=%{name}&dd=%{great}&{%}";
         expect = "http://ddfdf%4{df}dd?v1=1.8&name=java&dd=world&{%}";
-        assertEquals(expect,TextUtils.formatString(raw,params));
+        assertEquals(expect, TextUtils.formatString(raw, params));
     }
 
 }

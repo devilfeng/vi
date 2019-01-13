@@ -15,7 +15,7 @@ public class SourceCodeHelperTest {
 
     @Test
     public void testGetSourceCode() throws IOException {
-        SourceCodeHelper.SourceCode sourceCode =SourceCodeHelper.getJarSourceCode("rt.jar", "java.lang.Thread.java");
+        SourceCodeHelper.SourceCode sourceCode = SourceCodeHelper.getJarSourceCode("rt.jar", "java.lang.Thread.java");
         assertNotNull(sourceCode);
         assertNotNull(sourceCode.size);
         assertNotNull(sourceCode.content);

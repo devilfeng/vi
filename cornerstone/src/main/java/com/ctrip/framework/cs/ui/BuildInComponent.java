@@ -3,7 +3,7 @@ package com.ctrip.framework.cs.ui;
 /**
  * Created by jiang.j on 2016/11/1.
  */
-public class BuildInComponent implements BuildInPage{
+public class BuildInComponent implements BuildInPage {
     @Override
     public String getId() {
         return "Component";

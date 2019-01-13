@@ -13,11 +13,11 @@ public class NoneFilterRegistrationCondition implements Condition {
         try {
             Class.forName("org.springframework.boot.context.embedded.FilterRegistrationBean");
             return false;
-        }catch (Throwable e){
-            try{
+        } catch (Throwable e) {
+            try {
                 Class.forName("org.springframework.boot.web.servlet.FilterRegistrationBean");
                 return true;
-            }catch (Throwable e1){
+            } catch (Throwable e1) {
                 return false;
             }
         }

@@ -24,7 +24,7 @@ public class MetadataCollectorTest {
         List<ClassField> fieldList = metadata.getFields();
         assertTrue(fieldList.size() > 0);
 
-        Map<String,String> props = metadata.getPropMethodFields();
+        Map<String, String> props = metadata.getPropMethodFields();
         System.out.print(props);
 
 

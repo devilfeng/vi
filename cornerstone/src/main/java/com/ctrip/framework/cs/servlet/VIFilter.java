@@ -11,15 +11,16 @@ import java.io.IOException;
  * Created by jiang.j on 2017/2/17.
  */
 public class VIFilter implements Filter {
+    private final String urlPattern = "/@in";
     VIApiServlet apiServlet;
     StaticContentServlet staticContentServlet;
-    private final String urlPattern = "/@in";
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
-        apiServlet  = new VIApiServlet();
+        apiServlet = new VIApiServlet();
         apiServlet.init();
-        staticContentServlet =  new StaticContentServlet();
+        staticContentServlet = new StaticContentServlet();
         staticContentServlet.init();
 
     }
@@ -36,13 +37,13 @@ public class VIFilter implements Filter {
 
 
         String path = httpRequest.getRequestURI();
-        if (!path.startsWith(contextPath + urlPattern+"/") && !path.equalsIgnoreCase(contextPath + urlPattern)) {
-            chain.doFilter(request,response);
-        }else{
-            if(path.startsWith(contextPath+urlPattern+"/api/")){
-                apiServlet.service(request,response);
-            }else{
-                staticContentServlet.service(request,response);
+        if (!path.startsWith(contextPath + urlPattern + "/") && !path.equalsIgnoreCase(contextPath + urlPattern)) {
+            chain.doFilter(request, response);
+        } else {
+            if (path.startsWith(contextPath + urlPattern + "/api/")) {
+                apiServlet.service(request, response);
+            } else {
+                staticContentServlet.service(request, response);
             }
         }
     }

@@ -7,8 +7,10 @@ import java.util.Map;
  */
 public interface EnAuthentication {
 
-    String authentication(String user,String token,String ip,String requestUrl,Map<String,Object> parameters) throws AuthenticationFailedException;
+    String authentication(String user, String token, String ip, String requestUrl, Map<String, Object> parameters) throws AuthenticationFailedException;
+
     String getJumpUrl(String reqUrl);
+
     String getLogoutUrl(String reqUrl);
 
 }

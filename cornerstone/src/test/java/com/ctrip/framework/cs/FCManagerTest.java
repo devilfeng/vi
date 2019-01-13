@@ -10,12 +10,12 @@ import static org.junit.Assert.assertTrue;
  */
 public class FCManagerTest {
     @Test
-    public void testLoadFeatures(){
+    public void testLoadFeatures() {
 
     }
 
     @Test
-    public void testNoneKey(){
+    public void testNoneKey() {
 
         assertTrue(!FCManager.isFeatureEnable("none.exist"));
     }

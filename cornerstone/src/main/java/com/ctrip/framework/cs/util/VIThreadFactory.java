@@ -10,13 +10,15 @@ public class VIThreadFactory implements ThreadFactory {
 
     private final String namePrefix;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
-    public VIThreadFactory(String prefix){
 
-        namePrefix = prefix+"-";
+    public VIThreadFactory(String prefix) {
+
+        namePrefix = prefix + "-";
     }
+
     @Override
     public Thread newThread(Runnable r) {
-        Thread rtn = new Thread(r,namePrefix+threadNumber.getAndIncrement());
+        Thread rtn = new Thread(r, namePrefix + threadNumber.getAndIncrement());
         rtn.setDaemon(true);
         return rtn;
     }

@@ -8,30 +8,10 @@ import java.util.List;
  */
 public class DepSortUtil {
 
-    public static class Node{
-        private String _id;
-        private String[] _before,_afer;
-        public Node(String id,String[] before,String[] after){
-            _id = id;
-            _before = before;
-            _afer = after;
-        }
-
-        public String id(){
-            return _id;
-        }
-
-        public String[] before(){
-            return _before;
-        }
-        public String[] after(){
-            return  _afer;
-        }
-    }
-
     /**
      * sort node list by their dependencies.
      * this operation have side affection, it would empty the input list.
+     *
      * @param nodes need sorted nodes
      * @return
      * @throws LoopReferenceNodeException
@@ -52,8 +32,8 @@ public class DepSortUtil {
                 nodes.remove(first);
             } else if (!nodes.isEmpty()) {
                 String[] ids = new String[nodes.size()];
-                int i=0;
-                for(Node n:nodes){
+                int i = 0;
+                for (Node n : nodes) {
                     ids[i++] = n.id();
                 }
                 throw new LoopReferenceNodeException(ids);
@@ -64,22 +44,45 @@ public class DepSortUtil {
         return sortedIds;
     }
 
-    private static boolean hasBefore(Node currentInfo,List<Node> nodes,List<String> sortedIds){
+    private static boolean hasBefore(Node currentInfo, List<Node> nodes, List<String> sortedIds) {
 
-        for(String aId:currentInfo.after()){
-            if(!sortedIds.contains(aId)){
+        for (String aId : currentInfo.after()) {
+            if (!sortedIds.contains(aId)) {
                 return true;
             }
         }
         String id = currentInfo.id();
-        for(Node info:nodes){
-            if(id.equals(info.id()) || sortedIds.contains(info.id())){
+        for (Node info : nodes) {
+            if (id.equals(info.id()) || sortedIds.contains(info.id())) {
                 continue;
             }
-            if(ArrayUtils.contains(info.before(),id) && !ArrayUtils.contains(info.after(),id)){
+            if (ArrayUtils.contains(info.before(), id) && !ArrayUtils.contains(info.after(), id)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static class Node {
+        private String _id;
+        private String[] _before, _afer;
+
+        public Node(String id, String[] before, String[] after) {
+            _id = id;
+            _before = before;
+            _afer = after;
+        }
+
+        public String id() {
+            return _id;
+        }
+
+        public String[] before() {
+            return _before;
+        }
+
+        public String[] after() {
+            return _afer;
+        }
     }
 }

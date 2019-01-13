@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 public class JMXQueryTest {
 
     @Test
-    public void testQuery(){
+    public void testQuery() {
 
         JMXQuery jmxQuery = new JMXQuery();
         List<Map<String, Object>> rtn = jmxQuery.query(JMXQuery.JAVALANG, "MemoryPool", new String[]{"Name", "Usage"});

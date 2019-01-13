@@ -1,34 +1,24 @@
 package com.ctrip.framework.cs.metrics;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Created by jiang.j on 2016/7/4.
  */
 public class MetricsCollector {
 
-    private ConcurrentHashMap<String,MetricsObserver> obs;
-    private boolean isRunning =false,senderIsRuning=false;
-    private Set<String> metricNames;
-    private static MetricsCollector metricsCollector;
-    private final int SENDERMAXWAITTIME=10000;
-    BlockingQueue<StatsInfo> queue ;
-
     static final Object locker = new Object();
-
+    private static MetricsCollector metricsCollector;
+    private final int SENDERMAXWAITTIME = 10000;
+    BlockingQueue<StatsInfo> queue;
+    private ConcurrentHashMap<String, MetricsObserver> obs;
+    private boolean isRunning = false, senderIsRuning = false;
+    private Set<String> metricNames;
     private volatile long senderLastUpdateTime;
-    public static MetricsCollector getCollector(){
-        if(metricsCollector ==null){
-            synchronized (locker){
-                if(metricsCollector ==null){
-                    metricsCollector = new MetricsCollector();
-                }
-            }
-        }
-        return metricsCollector;
-    }
-
 
     private MetricsCollector() {
         obs = new ConcurrentHashMap<>();
@@ -36,43 +26,55 @@ public class MetricsCollector {
         metricNames = new ConcurrentSkipListSet<>();
     }
 
-    public boolean isRunning(){
+    public static MetricsCollector getCollector() {
+        if (metricsCollector == null) {
+            synchronized (locker) {
+                if (metricsCollector == null) {
+                    metricsCollector = new MetricsCollector();
+                }
+            }
+        }
+        return metricsCollector;
+    }
+
+    public boolean isRunning() {
         return isRunning;
     }
 
-    public Map<String,MetricsObserver.ObserverStatus> getObserverStatus(){
+    public Map<String, MetricsObserver.ObserverStatus> getObserverStatus() {
         Enumeration<String> keys = obs.keys();
-        Map<String,MetricsObserver.ObserverStatus> rtn = new HashMap<>();
-        while (keys.hasMoreElements()){
+        Map<String, MetricsObserver.ObserverStatus> rtn = new HashMap<>();
+        while (keys.hasMoreElements()) {
             String key = keys.nextElement();
-            rtn.put(key,obs.get(key).getObserStatus());
+            rtn.put(key, obs.get(key).getObserStatus());
         }
         return rtn;
     }
-    public int getMetricsNameCount(){
+
+    public int getMetricsNameCount() {
         return metricNames.size();
     }
 
-    public void stopAndClear(){
-        isRunning =false;
+    public void stopAndClear() {
+        isRunning = false;
         queue.clear();
-        for(MetricsObserver ob:obs.values()){
+        for (MetricsObserver ob : obs.values()) {
             ob.clearStore();
         }
         obs.clear();
     }
 
-    public Set<String> getMetricNames(){
+    public Set<String> getMetricNames() {
         return this.metricNames;
     }
 
-    public synchronized String addObserver(String ip,MetricsObserver observer) throws IllegalAccessException, InstantiationException {
-        if (ip == null){
+    public synchronized String addObserver(String ip, MetricsObserver observer) throws IllegalAccessException, InstantiationException {
+        if (ip == null) {
             ip = "dev";
         }
         String observerId = ip + System.currentTimeMillis();
-        obs.put(observerId,observer);
-        if(!isRunning && !senderIsRuning){
+        obs.put(observerId, observer);
+        if (!isRunning && !senderIsRuning) {
             new Thread("vi-metrics-sender") {
                 @Override
                 public void run() {
@@ -80,7 +82,7 @@ public class MetricsCollector {
                     while (isRunning) {
                         try {
                             notifyObservers(queue.take());
-                            if(obs.size()==0){
+                            if (obs.size() == 0) {
                                 stopAndClear();
                             }
                             senderLastUpdateTime = System.currentTimeMillis();
@@ -88,26 +90,26 @@ public class MetricsCollector {
                             e.printStackTrace();
                         }
                     }
-                    senderIsRuning =false;
+                    senderIsRuning = false;
                 }
             }.start();
-            senderIsRuning =true;
+            senderIsRuning = true;
         }
-        senderLastUpdateTime =System.currentTimeMillis();
-        isRunning=true;
+        senderLastUpdateTime = System.currentTimeMillis();
+        isRunning = true;
         return observerId;
     }
 
-    public MetricsObserver getObserver(String id){
-        if(obs == null || id == null)
+    public MetricsObserver getObserver(String id) {
+        if (obs == null || id == null)
             return null;
         return obs.get(id);
     }
 
-    public Map<String,MetricsSnapshot> getOberserStats(String id){
+    public Map<String, MetricsSnapshot> getOberserStats(String id) {
         MetricsObserver observer = getObserver(id);
-        senderLastUpdateTime =System.currentTimeMillis();
-        if(observer==null){
+        senderLastUpdateTime = System.currentTimeMillis();
+        if (observer == null) {
             return null;
         }
         return observer.drainDry();
@@ -122,17 +124,17 @@ public class MetricsCollector {
      * Each observer has its <code>update</code> method called with two
      * arguments: this observable object and the <code>arg</code> argument.
      *
-     * @param   arg   any object.
-     * @see     java.util.Observable#clearChanged()
-     * @see     java.util.Observable#hasChanged()
-     * @see     java.util.Observer#update(java.util.Observable, java.lang.Object)
+     * @param arg any object.
+     * @see java.util.Observable#clearChanged()
+     * @see java.util.Observable#hasChanged()
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     private void notifyObservers(StatsInfo arg) {
         Enumeration<String> keys = obs.keys();
-        while (keys.hasMoreElements()){
-           String currentKey = keys.nextElement();
-            MetricsObserver observer =obs.get(currentKey);
-            if(observer != null) {
+        while (keys.hasMoreElements()) {
+            String currentKey = keys.nextElement();
+            MetricsObserver observer = obs.get(currentKey);
+            if (observer != null) {
                 if (!observer.isExpire()) {
                     observer.record(arg.key, arg.cost, arg.tags);
                 } else {
@@ -147,46 +149,40 @@ public class MetricsCollector {
     /**
      * Returns the number of observers of this <tt>Observable</tt> object.
      *
-     * @return  the number of observers of this object.
+     * @return the number of observers of this object.
      */
     public synchronized int getObserversCount() {
         return obs.size();
     }
-    public class StatsInfo{
-        public String key;
-        public long cost;
-        public Map<String,String> tags;
-    }
 
-
-    public int waitedMsgCount(){
+    public int waitedMsgCount() {
         return queue.size();
     }
 
-    public void clearWaitingQueue(){
+    public void clearWaitingQueue() {
         this.queue.clear();
     }
 
-    private boolean isFilterKey(String key){
+    private boolean isFilterKey(String key) {
         Iterator<MetricsObserver> obsIterator = obs.values().iterator();
-        while (obsIterator.hasNext()){
-            if(obsIterator.next().hasMetricsKey(key)){
+        while (obsIterator.hasNext()) {
+            if (obsIterator.next().hasMetricsKey(key)) {
                 return true;
             }
         }
         return false;
     }
 
-    public void record(final String key,final long value,Map<String,String> tags){
+    public void record(final String key, final long value, Map<String, String> tags) {
         metricNames.add(key);
         try {
             if (isRunning && (obs.size() == 0)) {
-                    stopAndClear();
-                    return;
+                stopAndClear();
+                return;
             }
 
             if (isRunning) {
-                if(isFilterKey(key)) {
+                if (isFilterKey(key)) {
                     StatsInfo info = new StatsInfo();
                     info.key = key;
                     info.cost = value;
@@ -198,31 +194,31 @@ public class MetricsCollector {
                     return;
                 }
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
 
         }
     }
 
-    public long getStartNano(){
-        return isRunning?System.nanoTime():0l;
+    public long getStartNano() {
+        return isRunning ? System.nanoTime() : 0l;
     }
 
-    public void addMetricsName(String name){
+    public void addMetricsName(String name) {
         metricNames.add(name);
     }
 
-    public void removeClassMetrics(String className){
-        className = className.replace('/','.');
+    public void removeClassMetrics(String className) {
+        className = className.replace('/', '.');
         Set<String> names = new HashSet<>();
-        for(String n:metricNames){
-            if(n.startsWith(className)){
+        for (String n : metricNames) {
+            if (n.startsWith(className)) {
                 names.add(n);
             }
         }
         metricNames.removeAll(names);
     }
 
-    public void recordNano(String key,long startTime){
+    public void recordNano(String key, long startTime) {
         try {
             if (isRunning && (obs.size() == 0)) {
                 stopAndClear();
@@ -230,10 +226,10 @@ public class MetricsCollector {
             }
 
             if (isRunning) {
-                if(isFilterKey(key)) {
+                if (isFilterKey(key)) {
                     StatsInfo info = new StatsInfo();
                     info.key = key;
-                    info.cost = (System.nanoTime()-startTime)/1000L;
+                    info.cost = (System.nanoTime() - startTime) / 1000L;
                     //info.tags = tags;
                     queue.offer(info);
                 }
@@ -242,19 +238,26 @@ public class MetricsCollector {
                     return;
                 }
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
 
         }
     }
 
-    public void record(String key,long value){
-        record(key,value,null);
+    public void record(String key, long value) {
+        record(key, value, null);
     }
 
-    public void record(String key){
-        record(key+"##",-1,null);
+    public void record(String key) {
+        record(key + "##", -1, null);
     }
-    public void record(String key,Map<String,String> tags){
-        record(key+"##",-1,tags);
+
+    public void record(String key, Map<String, String> tags) {
+        record(key + "##", -1, tags);
+    }
+
+    public class StatsInfo {
+        public String key;
+        public long cost;
+        public Map<String, String> tags;
     }
 }

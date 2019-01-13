@@ -22,105 +22,107 @@ public class EnFactory {
     private static EnMaven enMaven = new DefaultEnMaven();
     private static EnUI enUI = new DefaultEnUI();
     private static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-    private static String initError=null;
+    private static String initError = null;
+
     static {
         Properties enPros = new Properties();
 
         try {
             InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("vi_en.properties");
-            if(inputStream!=null){
+            if (inputStream != null) {
                 enPros.load(inputStream);
 
                 EnBase currentEnBase = null;
-                if(enPros.containsKey("enBase")) {
+                if (enPros.containsKey("enBase")) {
                     currentEnBase = (EnBase) Class.forName(enPros.getProperty("enBase")).newInstance();
                     currentEnBase.getAppId();
                     currentEnBase.getEnvType();
                 }
 
-                if(currentEnBase !=null) {
+                if (currentEnBase != null) {
                     enBase = currentEnBase;
                 }
 
                 String appId = enBase.getAppId();
-                if(appId!=null) {
+                if (appId != null) {
                     System.setProperty("app.id", appId);
                 }
 
-                if(enPros.containsKey("enHost")) {
+                if (enPros.containsKey("enHost")) {
                     enHost = (EnHost) Class.forName(enPros.getProperty("enHost")).newInstance();
                 }
 
-                if(enPros.containsKey("enUI")) {
+                if (enPros.containsKey("enUI")) {
                     enUI = (EnUI) Class.forName(enPros.getProperty("enUI")).newInstance();
                 }
 
-                if(enPros.containsKey("enAuthentication")) {
+                if (enPros.containsKey("enAuthentication")) {
                     enAuthentication = (EnAuthentication) Class.forName(enPros.getProperty("enAuthentication")).newInstance();
                 }
 
-                if(enPros.containsKey("enFC")) {
+                if (enPros.containsKey("enFC")) {
                     enFC = (EnFC) Class.forName(enPros.getProperty("enFC")).newInstance();
                 }
 
-                if(enPros.containsKey("enMaven")) {
+                if (enPros.containsKey("enMaven")) {
                     enMaven = (EnMaven) Class.forName(enPros.getProperty("enMaven")).newInstance();
                 }
 
-                if(appId == null){
+                if (appId == null) {
                     throw new NoAppIdException();
                 }
 
 
-                if(enPros.containsKey("enApp")) {
+                if (enPros.containsKey("enApp")) {
                     enApp = (EnApp) Class.forName(enPros.getProperty("enApp")).newInstance();
                 }
 
 
-            }else{
+            } else {
                 logger.info("can't find vi_en.properties");
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
-            logger.warn("init enFactory failed",e);
+            logger.warn("init enFactory failed", e);
             StringWriter writer = new StringWriter();
-             e.printStackTrace(new PrintWriter(writer));
+            e.printStackTrace(new PrintWriter(writer));
             initError = writer.toString();
         }
     }
 
 
-    public static EnBase getEnBase(){
+    public static EnBase getEnBase() {
 
         return enBase;
     }
-    public static EnApp getEnApp(){
+
+    public static EnApp getEnApp() {
 
         return enApp;
     }
 
-    public static EnHost getEnHost(){
+    public static EnHost getEnHost() {
 
         return enHost;
     }
 
-    public static EnAuthentication getEnAuthentication(){
+    public static EnAuthentication getEnAuthentication() {
         return enAuthentication;
     }
 
-    public static EnFC getEnFC(){
+    public static EnFC getEnFC() {
         return enFC;
     }
 
-    public static EnMaven getEnMaven(){
+    public static EnMaven getEnMaven() {
         return enMaven;
     }
 
-    public static EnUI getEnUI(){
+    public static EnUI getEnUI() {
         return enUI;
     }
 
-    public static String getInitError(){
+    public static String getInitError() {
         return initError;
     }
 }

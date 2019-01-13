@@ -13,22 +13,23 @@ import java.net.URL;
  */
 public class CheckHelper {
 
+    private final int DEFAULT_TIMEOUT = 10000;
     private IgniteManager.SimpleLogger logger;
-    private final int DEFAULT_TIMEOUT= 10000;
-    private CheckHelper(IgniteManager.SimpleLogger logger){
+
+    private CheckHelper(IgniteManager.SimpleLogger logger) {
         this.logger = logger;
     }
 
-    public static CheckHelper create(IgniteManager.SimpleLogger logger){
+    public static CheckHelper create(IgniteManager.SimpleLogger logger) {
         return new CheckHelper(logger);
     }
 
-    public boolean telnet(String host,int port) throws IOException {
-        if(host.startsWith("http")){
+    public boolean telnet(String host, int port) throws IOException {
+        if (host.startsWith("http")) {
             host = new URL(host).getHost();
         }
         String tag = "telnet";
-        logger.info(LogHelper.beginBlock(tag , new String[]{"host" , host , "port",  String.valueOf(port)}));
+        logger.info(LogHelper.beginBlock(tag, new String[]{"host", host, "port", String.valueOf(port)}));
         InetAddress[] addresses;
         boolean canReach = false;
         try {
@@ -43,13 +44,13 @@ public class CheckHelper {
                     reachable = true;
                     canReach = true;
                 } catch (Throwable e) {
-                    logger.error("connect failed!",e);
+                    logger.error("connect failed!", e);
 
                 }
                 logger.info(address.getHostAddress() + " is " + (reachable ? "reachable" : "unreachable"));
             }
-        }finally {
-            logger.info(LogHelper.endBlock(tag ,new String[]{"isReachable",  String.valueOf(canReach)}));
+        } finally {
+            logger.info(LogHelper.endBlock(tag, new String[]{"isReachable", String.valueOf(canReach)}));
 
         }
 

@@ -29,20 +29,13 @@
  */
 package com.ctrip.framework.cs.asm.util;
 
+import com.ctrip.framework.cs.asm.*;
+import com.ctrip.framework.cs.asm.signature.SignatureReader;
+
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.ctrip.framework.cs.asm.Attribute;
-import com.ctrip.framework.cs.asm.Handle;
-import com.ctrip.framework.cs.asm.Label;
-import com.ctrip.framework.cs.asm.Opcodes;
-import com.ctrip.framework.cs.asm.ClassReader;
-import com.ctrip.framework.cs.asm.Type;
-import com.ctrip.framework.cs.asm.TypePath;
-import com.ctrip.framework.cs.asm.TypeReference;
-import com.ctrip.framework.cs.asm.signature.SignatureReader;
 
 /**
  * A {@link Printer} that prints a disassembled view of the classes it visits.
@@ -149,8 +142,7 @@ public class Textifier extends Printer {
      * constructor</i>. Instead, they must use the {@link #Textifier(int)}
      * version.
      *
-     * @throws IllegalStateException
-     *             If a subclass calls this constructor.
+     * @throws IllegalStateException If a subclass calls this constructor.
      */
     public Textifier() {
         this(Opcodes.ASM5);
@@ -162,8 +154,7 @@ public class Textifier extends Printer {
     /**
      * Constructs a new {@link Textifier}.
      *
-     * @param api
-     *            the ASM API version implemented by this visitor. Must be one
+     * @param api the ASM API version implemented by this visitor. Must be one
      *            of {@link Opcodes#ASM4} or {@link Opcodes#ASM5}.
      */
     protected Textifier(final int api) {
@@ -175,11 +166,8 @@ public class Textifier extends Printer {
      * <p>
      * Usage: Textifier [-debug] &lt;binary class name or class file name &gt;
      *
-     * @param args
-     *            the command line arguments.
-     *
-     * @throws Exception
-     *             if the class cannot be found, or if an IO exception occurs.
+     * @param args the command line arguments.
+     * @throws Exception if the class cannot be found, or if an IO exception occurs.
      */
     public static void main(final String[] args) throws Exception {
         int i = 0;
@@ -219,8 +207,8 @@ public class Textifier extends Printer {
 
     @Override
     public void visit(final int version, final int access, final String name,
-            final String signature, final String superName,
-            final String[] interfaces) {
+                      final String signature, final String superName,
+                      final String[] interfaces) {
         this.access = access;
         int major = version & 0xFFFF;
         int minor = version >>> 16;
@@ -287,7 +275,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitOuterClass(final String owner, final String name,
-            final String desc) {
+                                final String desc) {
         buf.setLength(0);
         buf.append(tab).append("OUTERCLASS ");
         appendDescriptor(INTERNAL_NAME, owner);
@@ -302,14 +290,14 @@ public class Textifier extends Printer {
 
     @Override
     public Textifier visitClassAnnotation(final String desc,
-            final boolean visible) {
+                                          final boolean visible) {
         text.add("\n");
         return visitAnnotation(desc, visible);
     }
 
     @Override
     public Printer visitClassTypeAnnotation(int typeRef, TypePath typePath,
-            String desc, boolean visible) {
+                                            String desc, boolean visible) {
         text.add("\n");
         return visitTypeAnnotation(typeRef, typePath, desc, visible);
     }
@@ -322,7 +310,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitInnerClass(final String name, final String outerName,
-            final String innerName, final int access) {
+                                final String innerName, final int access) {
         buf.setLength(0);
         buf.append(tab).append("// access flags 0x");
         buf.append(
@@ -342,7 +330,7 @@ public class Textifier extends Printer {
 
     @Override
     public Textifier visitField(final int access, final String name,
-            final String desc, final String signature, final Object value) {
+                                final String desc, final String signature, final Object value) {
         buf.setLength(0);
         buf.append('\n');
         if ((access & Opcodes.ACC_DEPRECATED) != 0) {
@@ -385,7 +373,7 @@ public class Textifier extends Printer {
 
     @Override
     public Textifier visitMethod(final int access, final String name,
-            final String desc, final String signature, final String[] exceptions) {
+                                 final String desc, final String signature, final String[] exceptions) {
         buf.setLength(0);
         buf.append('\n');
         if ((access & Opcodes.ACC_DEPRECATED) != 0) {
@@ -585,7 +573,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitEnum(final String name, final String desc,
-            final String value) {
+                          final String value) {
         buf.setLength(0);
         appendComa(valueNumber++);
         if (name != null) {
@@ -638,13 +626,13 @@ public class Textifier extends Printer {
 
     @Override
     public Textifier visitFieldAnnotation(final String desc,
-            final boolean visible) {
+                                          final boolean visible) {
         return visitAnnotation(desc, visible);
     }
 
     @Override
     public Printer visitFieldTypeAnnotation(int typeRef, TypePath typePath,
-            String desc, boolean visible) {
+                                            String desc, boolean visible) {
         return visitTypeAnnotation(typeRef, typePath, desc, visible);
     }
 
@@ -682,19 +670,19 @@ public class Textifier extends Printer {
 
     @Override
     public Textifier visitMethodAnnotation(final String desc,
-            final boolean visible) {
+                                           final boolean visible) {
         return visitAnnotation(desc, visible);
     }
 
     @Override
     public Printer visitMethodTypeAnnotation(int typeRef, TypePath typePath,
-            String desc, boolean visible) {
+                                             String desc, boolean visible) {
         return visitTypeAnnotation(typeRef, typePath, desc, visible);
     }
 
     @Override
     public Textifier visitParameterAnnotation(final int parameter,
-            final String desc, final boolean visible) {
+                                              final String desc, final boolean visible) {
         buf.setLength(0);
         buf.append(tab2).append('@');
         appendDescriptor(FIELD_DESCRIPTOR, desc);
@@ -729,34 +717,34 @@ public class Textifier extends Printer {
 
     @Override
     public void visitFrame(final int type, final int nLocal,
-            final Object[] local, final int nStack, final Object[] stack) {
+                           final Object[] local, final int nStack, final Object[] stack) {
         buf.setLength(0);
         buf.append(ltab);
         buf.append("FRAME ");
         switch (type) {
-        case Opcodes.F_NEW:
-        case Opcodes.F_FULL:
-            buf.append("FULL [");
-            appendFrameTypes(nLocal, local);
-            buf.append("] [");
-            appendFrameTypes(nStack, stack);
-            buf.append(']');
-            break;
-        case Opcodes.F_APPEND:
-            buf.append("APPEND [");
-            appendFrameTypes(nLocal, local);
-            buf.append(']');
-            break;
-        case Opcodes.F_CHOP:
-            buf.append("CHOP ").append(nLocal);
-            break;
-        case Opcodes.F_SAME:
-            buf.append("SAME");
-            break;
-        case Opcodes.F_SAME1:
-            buf.append("SAME1 ");
-            appendFrameTypes(1, stack);
-            break;
+            case Opcodes.F_NEW:
+            case Opcodes.F_FULL:
+                buf.append("FULL [");
+                appendFrameTypes(nLocal, local);
+                buf.append("] [");
+                appendFrameTypes(nStack, stack);
+                buf.append(']');
+                break;
+            case Opcodes.F_APPEND:
+                buf.append("APPEND [");
+                appendFrameTypes(nLocal, local);
+                buf.append(']');
+                break;
+            case Opcodes.F_CHOP:
+                buf.append("CHOP ").append(nLocal);
+                break;
+            case Opcodes.F_SAME:
+                buf.append("SAME");
+                break;
+            case Opcodes.F_SAME1:
+                buf.append("SAME1 ");
+                appendFrameTypes(1, stack);
+                break;
         }
         buf.append('\n');
         text.add(buf.toString());
@@ -799,7 +787,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitFieldInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+                               final String name, final String desc) {
         buf.setLength(0);
         buf.append(tab2).append(OPCODES[opcode]).append(' ');
         appendDescriptor(INTERNAL_NAME, owner);
@@ -812,7 +800,7 @@ public class Textifier extends Printer {
     @Deprecated
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc) {
+                                final String name, final String desc) {
         if (api >= Opcodes.ASM5) {
             super.visitMethodInsn(opcode, owner, name, desc);
             return;
@@ -823,7 +811,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc, final boolean itf) {
+                                final String name, final String desc, final boolean itf) {
         if (api < Opcodes.ASM5) {
             super.visitMethodInsn(opcode, owner, name, desc, itf);
             return;
@@ -832,7 +820,7 @@ public class Textifier extends Printer {
     }
 
     private void doVisitMethodInsn(final int opcode, final String owner,
-            final String name, final String desc, final boolean itf) {
+                                   final String name, final String desc, final boolean itf) {
         buf.setLength(0);
         buf.append(tab2).append(OPCODES[opcode]).append(' ');
         appendDescriptor(INTERNAL_NAME, owner);
@@ -844,7 +832,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitInvokeDynamicInsn(String name, String desc, Handle bsm,
-            Object... bsmArgs) {
+                                       Object... bsmArgs) {
         buf.setLength(0);
         buf.append(tab2).append("INVOKEDYNAMIC").append(' ');
         buf.append(name);
@@ -866,7 +854,7 @@ public class Textifier extends Printer {
                     appendString(buf, (String) cst);
                 } else if (cst instanceof Type) {
                     Type type = (Type) cst;
-                    if(type.getSort() == Type.METHOD){
+                    if (type.getSort() == Type.METHOD) {
                         appendDescriptor(METHOD_DESCRIPTOR, type.getDescriptor());
                     } else {
                         buf.append(type.getDescriptor()).append(".class");
@@ -928,7 +916,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitTableSwitchInsn(final int min, final int max,
-            final Label dflt, final Label... labels) {
+                                     final Label dflt, final Label... labels) {
         buf.setLength(0);
         buf.append(tab2).append("TABLESWITCH\n");
         for (int i = 0; i < labels.length; ++i) {
@@ -944,7 +932,7 @@ public class Textifier extends Printer {
 
     @Override
     public void visitLookupSwitchInsn(final Label dflt, final int[] keys,
-            final Label[] labels) {
+                                      final Label[] labels) {
         buf.setLength(0);
         buf.append(tab2).append("LOOKUPSWITCH\n");
         for (int i = 0; i < labels.length; ++i) {
@@ -969,13 +957,13 @@ public class Textifier extends Printer {
 
     @Override
     public Printer visitInsnAnnotation(int typeRef, TypePath typePath,
-            String desc, boolean visible) {
+                                       String desc, boolean visible) {
         return visitTypeAnnotation(typeRef, typePath, desc, visible);
     }
 
     @Override
     public void visitTryCatchBlock(final Label start, final Label end,
-            final Label handler, final String type) {
+                                   final Label handler, final String type) {
         buf.setLength(0);
         buf.append(tab2).append("TRYCATCHBLOCK ");
         appendLabel(start);
@@ -991,7 +979,7 @@ public class Textifier extends Printer {
 
     @Override
     public Printer visitTryCatchAnnotation(int typeRef, TypePath typePath,
-            String desc, boolean visible) {
+                                           String desc, boolean visible) {
         buf.setLength(0);
         buf.append(tab2).append("TRYCATCHBLOCK @");
         appendDescriptor(FIELD_DESCRIPTOR, desc);
@@ -1010,8 +998,8 @@ public class Textifier extends Printer {
 
     @Override
     public void visitLocalVariable(final String name, final String desc,
-            final String signature, final Label start, final Label end,
-            final int index) {
+                                   final String signature, final Label start, final Label end,
+                                   final int index) {
         buf.setLength(0);
         buf.append(tab2).append("LOCALVARIABLE ").append(name).append(' ');
         appendDescriptor(FIELD_DESCRIPTOR, desc);
@@ -1036,8 +1024,8 @@ public class Textifier extends Printer {
 
     @Override
     public Printer visitLocalVariableAnnotation(int typeRef, TypePath typePath,
-            Label[] start, Label[] end, int[] index, String desc,
-            boolean visible) {
+                                                Label[] start, Label[] end, int[] index, String desc,
+                                                boolean visible) {
         buf.setLength(0);
         buf.append(tab2).append("LOCALVARIABLE @");
         appendDescriptor(FIELD_DESCRIPTOR, desc);
@@ -1092,10 +1080,8 @@ public class Textifier extends Printer {
     /**
      * Prints a disassembled view of the given annotation.
      *
-     * @param desc
-     *            the class descriptor of the annotation class.
-     * @param visible
-     *            <tt>true</tt> if the annotation is visible at runtime.
+     * @param desc    the class descriptor of the annotation class.
+     * @param visible <tt>true</tt> if the annotation is visible at runtime.
      * @return a visitor to visit the annotation values.
      */
     public Textifier visitAnnotation(final String desc, final boolean visible) {
@@ -1113,20 +1099,16 @@ public class Textifier extends Printer {
     /**
      * Prints a disassembled view of the given type annotation.
      *
-     * @param typeRef
-     *            a reference to the annotated type. See {@link TypeReference}.
-     * @param typePath
-     *            the path to the annotated type argument, wildcard bound, array
-     *            element type, or static inner type within 'typeRef'. May be
-     *            <tt>null</tt> if the annotation targets 'typeRef' as a whole.
-     * @param desc
-     *            the class descriptor of the annotation class.
-     * @param visible
-     *            <tt>true</tt> if the annotation is visible at runtime.
+     * @param typeRef  a reference to the annotated type. See {@link TypeReference}.
+     * @param typePath the path to the annotated type argument, wildcard bound, array
+     *                 element type, or static inner type within 'typeRef'. May be
+     *                 <tt>null</tt> if the annotation targets 'typeRef' as a whole.
+     * @param desc     the class descriptor of the annotation class.
+     * @param visible  <tt>true</tt> if the annotation is visible at runtime.
      * @return a visitor to visit the annotation values.
      */
     public Textifier visitTypeAnnotation(final int typeRef,
-            final TypePath typePath, final String desc, final boolean visible) {
+                                         final TypePath typePath, final String desc, final boolean visible) {
         buf.setLength(0);
         buf.append(tab).append('@');
         appendDescriptor(FIELD_DESCRIPTOR, desc);
@@ -1146,8 +1128,7 @@ public class Textifier extends Printer {
     /**
      * Prints a disassembled view of the given attribute.
      *
-     * @param attr
-     *            an attribute.
+     * @param attr an attribute.
      */
     public void visitAttribute(final Attribute attr) {
         buf.setLength(0);
@@ -1180,12 +1161,10 @@ public class Textifier extends Printer {
      * Appends an internal name, a type descriptor or a type signature to
      * {@link #buf buf}.
      *
-     * @param type
-     *            indicates if desc is an internal name, a field descriptor, a
-     *            method descriptor, a class signature, ...
-     * @param desc
-     *            an internal name, type descriptor, or type signature. May be
-     *            <tt>null</tt>.
+     * @param type indicates if desc is an internal name, a field descriptor, a
+     *             method descriptor, a class signature, ...
+     * @param desc an internal name, type descriptor, or type signature. May be
+     *             <tt>null</tt>.
      */
     protected void appendDescriptor(final int type, final String desc) {
         if (type == CLASS_SIGNATURE || type == FIELD_SIGNATURE
@@ -1202,8 +1181,7 @@ public class Textifier extends Printer {
      * Appends the name of the given label to {@link #buf buf}. Creates a new
      * label name if the given label does not yet have one.
      *
-     * @param l
-     *            a label.
+     * @param l a label.
      */
     protected void appendLabel(final Label l) {
         if (labelNames == null) {
@@ -1220,8 +1198,7 @@ public class Textifier extends Printer {
     /**
      * Appends the information about the given handle to {@link #buf buf}.
      *
-     * @param h
-     *            a handle, non null.
+     * @param h a handle, non null.
      */
     protected void appendHandle(final Handle h) {
         int tag = h.getTag();
@@ -1229,49 +1206,49 @@ public class Textifier extends Printer {
                 .append(" : ");
         boolean isMethodHandle = false;
         switch (tag) {
-        case Opcodes.H_GETFIELD:
-            buf.append("GETFIELD");
-            break;
-        case Opcodes.H_GETSTATIC:
-            buf.append("GETSTATIC");
-            break;
-        case Opcodes.H_PUTFIELD:
-            buf.append("PUTFIELD");
-            break;
-        case Opcodes.H_PUTSTATIC:
-            buf.append("PUTSTATIC");
-            break;
-        case Opcodes.H_INVOKEINTERFACE:
-            buf.append("INVOKEINTERFACE");
-            isMethodHandle = true;
-            break;
-        case Opcodes.H_INVOKESPECIAL:
-            buf.append("INVOKESPECIAL");
-            isMethodHandle = true;
-            break;
-        case Opcodes.H_INVOKESTATIC:
-            buf.append("INVOKESTATIC");
-            isMethodHandle = true;
-            break;
-        case Opcodes.H_INVOKEVIRTUAL:
-            buf.append("INVOKEVIRTUAL");
-            isMethodHandle = true;
-            break;
-        case Opcodes.H_NEWINVOKESPECIAL:
-            buf.append("NEWINVOKESPECIAL");
-            isMethodHandle = true;
-            break;
+            case Opcodes.H_GETFIELD:
+                buf.append("GETFIELD");
+                break;
+            case Opcodes.H_GETSTATIC:
+                buf.append("GETSTATIC");
+                break;
+            case Opcodes.H_PUTFIELD:
+                buf.append("PUTFIELD");
+                break;
+            case Opcodes.H_PUTSTATIC:
+                buf.append("PUTSTATIC");
+                break;
+            case Opcodes.H_INVOKEINTERFACE:
+                buf.append("INVOKEINTERFACE");
+                isMethodHandle = true;
+                break;
+            case Opcodes.H_INVOKESPECIAL:
+                buf.append("INVOKESPECIAL");
+                isMethodHandle = true;
+                break;
+            case Opcodes.H_INVOKESTATIC:
+                buf.append("INVOKESTATIC");
+                isMethodHandle = true;
+                break;
+            case Opcodes.H_INVOKEVIRTUAL:
+                buf.append("INVOKEVIRTUAL");
+                isMethodHandle = true;
+                break;
+            case Opcodes.H_NEWINVOKESPECIAL:
+                buf.append("NEWINVOKESPECIAL");
+                isMethodHandle = true;
+                break;
         }
         buf.append('\n');
         buf.append(tab3);
         appendDescriptor(INTERNAL_NAME, h.getOwner());
         buf.append('.');
         buf.append(h.getName());
-        if(!isMethodHandle){
+        if (!isMethodHandle) {
             buf.append('(');
         }
         appendDescriptor(HANDLE_DESCRIPTOR, h.getDesc());
-        if(!isMethodHandle){
+        if (!isMethodHandle) {
             buf.append(')');
         }
     }
@@ -1280,8 +1257,7 @@ public class Textifier extends Printer {
      * Appends a string representation of the given access modifiers to
      * {@link #buf buf}.
      *
-     * @param access
-     *            some access modifiers.
+     * @param access some access modifiers.
      */
     private void appendAccess(final int access) {
         if ((access & Opcodes.ACC_PUBLIC) != 0) {
@@ -1334,84 +1310,84 @@ public class Textifier extends Printer {
     private void appendTypeReference(final int typeRef) {
         TypeReference ref = new TypeReference(typeRef);
         switch (ref.getSort()) {
-        case TypeReference.CLASS_TYPE_PARAMETER:
-            buf.append("CLASS_TYPE_PARAMETER ").append(
-                    ref.getTypeParameterIndex());
-            break;
-        case TypeReference.METHOD_TYPE_PARAMETER:
-            buf.append("METHOD_TYPE_PARAMETER ").append(
-                    ref.getTypeParameterIndex());
-            break;
-        case TypeReference.CLASS_EXTENDS:
-            buf.append("CLASS_EXTENDS ").append(ref.getSuperTypeIndex());
-            break;
-        case TypeReference.CLASS_TYPE_PARAMETER_BOUND:
-            buf.append("CLASS_TYPE_PARAMETER_BOUND ")
-                    .append(ref.getTypeParameterIndex()).append(", ")
-                    .append(ref.getTypeParameterBoundIndex());
-            break;
-        case TypeReference.METHOD_TYPE_PARAMETER_BOUND:
-            buf.append("METHOD_TYPE_PARAMETER_BOUND ")
-                    .append(ref.getTypeParameterIndex()).append(", ")
-                    .append(ref.getTypeParameterBoundIndex());
-            break;
-        case TypeReference.FIELD:
-            buf.append("FIELD");
-            break;
-        case TypeReference.METHOD_RETURN:
-            buf.append("METHOD_RETURN");
-            break;
-        case TypeReference.METHOD_RECEIVER:
-            buf.append("METHOD_RECEIVER");
-            break;
-        case TypeReference.METHOD_FORMAL_PARAMETER:
-            buf.append("METHOD_FORMAL_PARAMETER ").append(
-                    ref.getFormalParameterIndex());
-            break;
-        case TypeReference.THROWS:
-            buf.append("THROWS ").append(ref.getExceptionIndex());
-            break;
-        case TypeReference.LOCAL_VARIABLE:
-            buf.append("LOCAL_VARIABLE");
-            break;
-        case TypeReference.RESOURCE_VARIABLE:
-            buf.append("RESOURCE_VARIABLE");
-            break;
-        case TypeReference.EXCEPTION_PARAMETER:
-            buf.append("EXCEPTION_PARAMETER ").append(
-                    ref.getTryCatchBlockIndex());
-            break;
-        case TypeReference.INSTANCEOF:
-            buf.append("INSTANCEOF");
-            break;
-        case TypeReference.NEW:
-            buf.append("NEW");
-            break;
-        case TypeReference.CONSTRUCTOR_REFERENCE:
-            buf.append("CONSTRUCTOR_REFERENCE");
-            break;
-        case TypeReference.METHOD_REFERENCE:
-            buf.append("METHOD_REFERENCE");
-            break;
-        case TypeReference.CAST:
-            buf.append("CAST ").append(ref.getTypeArgumentIndex());
-            break;
-        case TypeReference.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
-            buf.append("CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT ").append(
-                    ref.getTypeArgumentIndex());
-            break;
-        case TypeReference.METHOD_INVOCATION_TYPE_ARGUMENT:
-            buf.append("METHOD_INVOCATION_TYPE_ARGUMENT ").append(
-                    ref.getTypeArgumentIndex());
-            break;
-        case TypeReference.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT:
-            buf.append("CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT ").append(
-                    ref.getTypeArgumentIndex());
-            break;
-        case TypeReference.METHOD_REFERENCE_TYPE_ARGUMENT:
-            buf.append("METHOD_REFERENCE_TYPE_ARGUMENT ").append(
-                    ref.getTypeArgumentIndex());
-            break;
+            case TypeReference.CLASS_TYPE_PARAMETER:
+                buf.append("CLASS_TYPE_PARAMETER ").append(
+                        ref.getTypeParameterIndex());
+                break;
+            case TypeReference.METHOD_TYPE_PARAMETER:
+                buf.append("METHOD_TYPE_PARAMETER ").append(
+                        ref.getTypeParameterIndex());
+                break;
+            case TypeReference.CLASS_EXTENDS:
+                buf.append("CLASS_EXTENDS ").append(ref.getSuperTypeIndex());
+                break;
+            case TypeReference.CLASS_TYPE_PARAMETER_BOUND:
+                buf.append("CLASS_TYPE_PARAMETER_BOUND ")
+                        .append(ref.getTypeParameterIndex()).append(", ")
+                        .append(ref.getTypeParameterBoundIndex());
+                break;
+            case TypeReference.METHOD_TYPE_PARAMETER_BOUND:
+                buf.append("METHOD_TYPE_PARAMETER_BOUND ")
+                        .append(ref.getTypeParameterIndex()).append(", ")
+                        .append(ref.getTypeParameterBoundIndex());
+                break;
+            case TypeReference.FIELD:
+                buf.append("FIELD");
+                break;
+            case TypeReference.METHOD_RETURN:
+                buf.append("METHOD_RETURN");
+                break;
+            case TypeReference.METHOD_RECEIVER:
+                buf.append("METHOD_RECEIVER");
+                break;
+            case TypeReference.METHOD_FORMAL_PARAMETER:
+                buf.append("METHOD_FORMAL_PARAMETER ").append(
+                        ref.getFormalParameterIndex());
+                break;
+            case TypeReference.THROWS:
+                buf.append("THROWS ").append(ref.getExceptionIndex());
+                break;
+            case TypeReference.LOCAL_VARIABLE:
+                buf.append("LOCAL_VARIABLE");
+                break;
+            case TypeReference.RESOURCE_VARIABLE:
+                buf.append("RESOURCE_VARIABLE");
+                break;
+            case TypeReference.EXCEPTION_PARAMETER:
+                buf.append("EXCEPTION_PARAMETER ").append(
+                        ref.getTryCatchBlockIndex());
+                break;
+            case TypeReference.INSTANCEOF:
+                buf.append("INSTANCEOF");
+                break;
+            case TypeReference.NEW:
+                buf.append("NEW");
+                break;
+            case TypeReference.CONSTRUCTOR_REFERENCE:
+                buf.append("CONSTRUCTOR_REFERENCE");
+                break;
+            case TypeReference.METHOD_REFERENCE:
+                buf.append("METHOD_REFERENCE");
+                break;
+            case TypeReference.CAST:
+                buf.append("CAST ").append(ref.getTypeArgumentIndex());
+                break;
+            case TypeReference.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+                buf.append("CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT ").append(
+                        ref.getTypeArgumentIndex());
+                break;
+            case TypeReference.METHOD_INVOCATION_TYPE_ARGUMENT:
+                buf.append("METHOD_INVOCATION_TYPE_ARGUMENT ").append(
+                        ref.getTypeArgumentIndex());
+                break;
+            case TypeReference.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT:
+                buf.append("CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT ").append(
+                        ref.getTypeArgumentIndex());
+                break;
+            case TypeReference.METHOD_REFERENCE_TYPE_ARGUMENT:
+                buf.append("METHOD_REFERENCE_TYPE_ARGUMENT ").append(
+                        ref.getTypeArgumentIndex());
+                break;
         }
     }
 
@@ -1429,27 +1405,27 @@ public class Textifier extends Printer {
                 }
             } else if (o[i] instanceof Integer) {
                 switch (((Integer) o[i]).intValue()) {
-                case 0:
-                    appendDescriptor(FIELD_DESCRIPTOR, "T");
-                    break;
-                case 1:
-                    appendDescriptor(FIELD_DESCRIPTOR, "I");
-                    break;
-                case 2:
-                    appendDescriptor(FIELD_DESCRIPTOR, "F");
-                    break;
-                case 3:
-                    appendDescriptor(FIELD_DESCRIPTOR, "D");
-                    break;
-                case 4:
-                    appendDescriptor(FIELD_DESCRIPTOR, "J");
-                    break;
-                case 5:
-                    appendDescriptor(FIELD_DESCRIPTOR, "N");
-                    break;
-                case 6:
-                    appendDescriptor(FIELD_DESCRIPTOR, "U");
-                    break;
+                    case 0:
+                        appendDescriptor(FIELD_DESCRIPTOR, "T");
+                        break;
+                    case 1:
+                        appendDescriptor(FIELD_DESCRIPTOR, "I");
+                        break;
+                    case 2:
+                        appendDescriptor(FIELD_DESCRIPTOR, "F");
+                        break;
+                    case 3:
+                        appendDescriptor(FIELD_DESCRIPTOR, "D");
+                        break;
+                    case 4:
+                        appendDescriptor(FIELD_DESCRIPTOR, "J");
+                        break;
+                    case 5:
+                        appendDescriptor(FIELD_DESCRIPTOR, "N");
+                        break;
+                    case 6:
+                        appendDescriptor(FIELD_DESCRIPTOR, "U");
+                        break;
                 }
             } else {
                 appendLabel((Label) o[i]);

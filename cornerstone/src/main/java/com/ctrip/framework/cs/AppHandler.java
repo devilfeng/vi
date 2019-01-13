@@ -12,8 +12,8 @@ import java.util.Map;
  * Created by jiang.j on 2016/8/29.
  */
 public class AppHandler implements ViFunctionHandler {
-    private  String startPath ="/app/";
-    private transient EventLogger eventLogger = EventLoggerFactory.getLogger(getClass(),"vi.uv");
+    private String startPath = "/app/";
+    private transient EventLogger eventLogger = EventLoggerFactory.getLogger(getClass(), "vi.uv");
 
     @Override
     public Object execute(String path, String user, int permission, Logger logger, Map<String, Object> params) throws Exception {
@@ -21,19 +21,19 @@ public class AppHandler implements ViFunctionHandler {
         AppInfo appInfo = ComponentManager.getStatus(AppInfo.class);
 
         String opPath = path.substring(startPath.length()).toLowerCase();
-        if(!(user!=null && user.length()>2 && user.equals(appInfo.getAppOwner())) && !"uvtrace".equals(opPath)) {
+        if (!(user != null && user.length() > 2 && user.equals(appInfo.getAppOwner())) && !"uvtrace".equals(opPath)) {
             throw new NoPermissionException();
         }
-        switch (opPath){
+        switch (opPath) {
             case "markdown":
-                if(!appInfo.isStatusSourceEnabled()){
+                if (!appInfo.isStatusSourceEnabled()) {
                     throw new Exception("can't markdwon. because statusSources be disabled!");
                 }
                 OwnerJudge.getInstance().toAbnormal();
                 logger.warn(user + " markdown the app.");
                 break;
             case "markup":
-                if(!appInfo.isStatusSourceEnabled()){
+                if (!appInfo.isStatusSourceEnabled()) {
                     throw new Exception("can't markup. because statusSources be disabled!");
                 }
                 OwnerJudge.getInstance().toNormal();

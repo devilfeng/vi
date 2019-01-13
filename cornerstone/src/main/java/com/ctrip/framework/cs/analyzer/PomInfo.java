@@ -6,8 +6,8 @@ import java.util.List;
 /**
  * Created by jiang.j on 2016/5/19.
  */
-public class PomInfo implements Serializable{
-    public String  groupId;
+public class PomInfo implements Serializable {
+    public String groupId;
     public String artifactId;
     public String version;
     public String location;

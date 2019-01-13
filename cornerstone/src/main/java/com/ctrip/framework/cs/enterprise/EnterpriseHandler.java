@@ -14,27 +14,28 @@ import java.util.Map;
  */
 public class EnterpriseHandler implements ViFunctionHandler {
     String startPath = "/enterprise/";
+
     @Override
     public Object execute(String path, String user, int permission, Logger logger, Map<String, Object> params) throws Exception {
-        Object rtn=null;
-        String pageStartPath = startPath+"page/";
-        if(path.equals(startPath+"servers")) {
+        Object rtn = null;
+        String pageStartPath = startPath + "page/";
+        if (path.equals(startPath + "servers")) {
             rtn = EnFactory.getEnApp().getAllServers();
-        }else if(path.equals(startPath+"help")) {
+        } else if (path.equals(startPath + "help")) {
             rtn = EnFactory.getEnApp().getHelpLinks();
-        }else if(path.startsWith(pageStartPath)) {
+        } else if (path.startsWith(pageStartPath)) {
             String subPath = path.substring(pageStartPath.length());
-            if(subPath.length()>2) {
+            if (subPath.length() > 2) {
                 String[] parts = subPath.split("/");
                 CustomPage customPage = EnFactory.getEnUI().getPageById(parts[0]);
 
-                if(parts.length == 1) {
+                if (parts.length == 1) {
                     Map<String, String> cdata = new HashMap<>();
                     String folder = "enterprisepages";
                     cdata.put("html", Tools.getInnerResources(customPage.getClass(), folder, parts[0], "html"));
                     cdata.put("js", Tools.getInnerResources(customPage.getClass(), folder, parts[0], "js"));
                     rtn = cdata;
-                }else {
+                } else {
                     rtn = Tools.doClassStaticMethod(customPage.getClass(), parts[1], params);
                 }
             }
@@ -42,7 +43,6 @@ public class EnterpriseHandler implements ViFunctionHandler {
 
         return rtn;
     }
-
 
 
     @Override

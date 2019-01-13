@@ -1,6 +1,7 @@
 package com.ctrip.framework.cs;
 
 import org.junit.Test;
+
 import java.lang.reflect.Field;
 
 /**
@@ -8,9 +9,9 @@ import java.lang.reflect.Field;
  */
 public class ConfigTest {
     @Test
-    public void testInjectValue(){
+    public void testInjectValue() {
         Class<?> myclass = TestConfigBean.class;
-        Field[] fileds =myclass.getDeclaredFields();
+        Field[] fileds = myclass.getDeclaredFields();
 
         for (int i = 0; i < fileds.length; i++) {
 
@@ -21,7 +22,7 @@ public class ConfigTest {
         Field field = fileds[0];
         field.setAccessible(true);
         try {
-            field.set(null,"myname");
+            field.set(null, "myname");
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }

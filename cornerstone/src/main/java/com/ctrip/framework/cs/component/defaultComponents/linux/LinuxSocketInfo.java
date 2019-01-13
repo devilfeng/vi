@@ -17,7 +17,7 @@ import static com.ctrip.framework.cs.util.LinuxInfoUtil.parseIp;
 /**
  * Created by jiang.j on 2016/7/28.
  */
-@ComponentStatus(id="vi.linux.socketinfo",name="netstats",description = "应用网络链接信息",list = true,auto = false)
+@ComponentStatus(id = "vi.linux.socketinfo", name = "netstats", description = "应用网络链接信息", list = true, auto = false)
 public class LinuxSocketInfo {
 
     static transient Logger _logger = LoggerFactory.getLogger(LinuxSocketInfo.class);
@@ -37,22 +37,23 @@ public class LinuxSocketInfo {
      * unix_LISTENING = 01,
      * unix_CONNECTED = 03,
      */
-    @FieldInfo(name = "local ip",description = "本地地址")
+    @FieldInfo(name = "local ip", description = "本地地址")
     public final String local_address;
-    @FieldInfo(name = "local port",description = "本地端口")
+    @FieldInfo(name = "local port", description = "本地端口")
     public final String local_port;
-    @FieldInfo(name = "remote ip",description = "远端地址")
+    @FieldInfo(name = "remote ip", description = "远端地址")
     public final String rem_address;
-    @FieldInfo(name = "remote port",description = "远端端口")
+    @FieldInfo(name = "remote port", description = "远端端口")
     public final String rem_port;
-    @FieldInfo(name = "state",description = "状态")
+    @FieldInfo(name = "state", description = "状态")
     public final String state;
-    @FieldInfo(name = "protocol",description = "协议")
+    @FieldInfo(name = "protocol", description = "协议")
     public final String protocol;
-    @FieldInfo(name = "user id",description = "用户id")
+    @FieldInfo(name = "user id", description = "用户id")
     public final String uid;
-    public LinuxSocketInfo(String local_address,String local_port,String rem_address,String rem_port,
-                           String state,String protocol,String uid) {           //create a blank socket..just for the hell of it ie debugging
+
+    public LinuxSocketInfo(String local_address, String local_port, String rem_address, String rem_port,
+                           String state, String protocol, String uid) {           //create a blank socket..just for the hell of it ie debugging
 
         this.local_address = local_address;
         this.local_port = local_port;
@@ -70,14 +71,14 @@ public class LinuxSocketInfo {
         ArrayList<LinuxSocketInfo> sockets = new ArrayList<>();
         String line;
 
-        try(FileReader tcp = new FileReader("/proc/" + pid + "/net/"+type);LineNumberReader lnr = new LineNumberReader(tcp)) {
+        try (FileReader tcp = new FileReader("/proc/" + pid + "/net/" + type); LineNumberReader lnr = new LineNumberReader(tcp)) {
             lnr.readLine();
-            while ((line=lnr.readLine())!=null) {
-                LinuxSocketInfo socketInfo =parseSocket(line.trim(),type);
+            while ((line = lnr.readLine()) != null) {
+                LinuxSocketInfo socketInfo = parseSocket(line.trim(), type);
                 sockets.add(socketInfo);
             }
         } catch (Throwable e) {
-            _logger.warn("read linux tcp file failed",e);
+            _logger.warn("read linux tcp file failed", e);
         }
         return sockets;
     }
@@ -91,18 +92,18 @@ public class LinuxSocketInfo {
         return rtn;
     }
 
-    public static LinuxSocketInfo parseSocket(String line,String type) {          //parse socket entries
+    public static LinuxSocketInfo parseSocket(String line, String type) {          //parse socket entries
 
         String[] parts = line.split("\\s+");
         Object[] localIp = parseIp(parts[1]);
         String local_address = (String) localIp[0];
 
-        String local_port =  localIp[1].toString();
+        String local_port = localIp[1].toString();
 
         Object[] remoteIp = parseIp(parts[2]);
         String rem_address = (String) remoteIp[0];
 
-        String rem_port =  remoteIp[1].toString();
+        String rem_port = remoteIp[1].toString();
         String state = null;
 
         int st = Integer.valueOf(parts[3], 16);          //get the state number and convert to int from hex
@@ -147,6 +148,6 @@ public class LinuxSocketInfo {
 
         }
         String uid = (parts[7]);
-        return new LinuxSocketInfo(local_address,local_port,rem_address,rem_port,state,type,uid);
+        return new LinuxSocketInfo(local_address, local_port, rem_address, rem_port, state, type, uid);
     }
 }

@@ -9,5 +9,6 @@ public interface EventLogger {
     public static final String TRANSEND = "trans-end";
     public static final String TRANSFINALLY = "trans-finally";
     public static final String ERROR = "error";
-    public void fireEvent(String message,Object... args);
+
+    public void fireEvent(String message, Object... args);
 }

@@ -31,7 +31,7 @@ package com.ctrip.framework.cs.asm;
 
 /**
  * An edge in the control flow graph of a method body. See {@link Label Label}.
- * 
+ *
  * @author Eric Bruneton
  */
 class Edge {

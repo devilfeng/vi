@@ -10,8 +10,8 @@ import static org.junit.Assert.assertTrue;
  */
 public class PomUtilTest {
     @Test
-    public  void getPomInfoTest(){
-            String[] av = PomUtil.getArtifactIdAndVersion("tomcat-jdbc");
+    public void getPomInfoTest() {
+        String[] av = PomUtil.getArtifactIdAndVersion("tomcat-jdbc");
         assertTrue(av == null);
 
     }

@@ -12,56 +12,53 @@ import java.util.Map;
  */
 public class CacheHandler implements ViFunctionHandler {
 
-    private String startPath="/cache/";
+    private String startPath = "/cache/";
+
     @Override
-    public Object execute(String path, String user, int permission,Logger logger, Map<String, Object> params) throws Exception{
-        Object rtn=null;
-        String statusPath = startPath+"status/";
-        if(path.startsWith(statusPath)){
+    public Object execute(String path, String user, int permission, Logger logger, Map<String, Object> params) throws Exception {
+        Object rtn = null;
+        String statusPath = startPath + "status/";
+        if (path.startsWith(statusPath)) {
             String typeName = path.substring(statusPath.length());
             rtn = CacheManager.status(typeName);
-        }
-        else if(path.equals(startPath+"types")){
+        } else if (path.equals(startPath + "types")) {
             rtn = CacheManager.types();
-        }
-        else if(path.equals(startPath+"refresh")){
+        } else if (path.equals(startPath + "refresh")) {
             String[] idAndType = getIdAndTypeFromParams(params);
-            logger.info(user + " refresh cache,cach id:"+idAndType[0]+", cache type:"+idAndType[1]);
-            rtn = CacheManager.refreshById(idAndType[0],idAndType[1]);
-        }
-        else if(path.equals(startPath+"getbykey")){
+            logger.info(user + " refresh cache,cach id:" + idAndType[0] + ", cache type:" + idAndType[1]);
+            rtn = CacheManager.refreshById(idAndType[0], idAndType[1]);
+        } else if (path.equals(startPath + "getbykey")) {
             Object key = (params.get("key"));
-            if(key instanceof  JsonElement){
-                key = ((JsonElement)key).getAsString();
+            if (key instanceof JsonElement) {
+                key = ((JsonElement) key).getAsString();
             }
             String[] idAndType = getIdAndTypeFromParams(params);
-            logger.info(user + " get cache content by key. cache id:"+idAndType[0]+", cache type:" +idAndType[1] +" key:"+key);
-            rtn = CacheManager.findCellById(idAndType[0],idAndType[1]).getByKey((String)key);
+            logger.info(user + " get cache content by key. cache id:" + idAndType[0] + ", cache type:" + idAndType[1] + " key:" + key);
+            rtn = CacheManager.findCellById(idAndType[0], idAndType[1]).getByKey((String) key);
 
-        }
-        else if(path.equals(startPath+"getbyindex")){
+        } else if (path.equals(startPath + "getbyindex")) {
             Object index = (params.get("index"));
-            if(index instanceof  JsonElement){
-                index = ((JsonElement)index).getAsString();
+            if (index instanceof JsonElement) {
+                index = ((JsonElement) index).getAsString();
             }
             String[] idAndType = getIdAndTypeFromParams(params);
-            logger.info(user + " get cache content by index. cache id:"+idAndType[0]+", cache type:" +idAndType[1] +" index:"+index);
-            rtn = CacheManager.findByIndex(idAndType[0],idAndType[1],Integer.parseInt((String)index));
+            logger.info(user + " get cache content by index. cache id:" + idAndType[0] + ", cache type:" + idAndType[1] + " index:" + index);
+            rtn = CacheManager.findByIndex(idAndType[0], idAndType[1], Integer.parseInt((String) index));
 
         }
         return rtn;
     }
 
-    private String[] getIdAndTypeFromParams(Map<String,Object> params){
+    private String[] getIdAndTypeFromParams(Map<String, Object> params) {
         Object id = (params.get("id"));
         Object typeName = (params.get("typeName"));
-        if(id instanceof JsonElement){
-            id = ((JsonElement)id).getAsString();
+        if (id instanceof JsonElement) {
+            id = ((JsonElement) id).getAsString();
         }
-        if(typeName instanceof  JsonElement){
-            typeName = ((JsonElement)typeName).getAsString();
+        if (typeName instanceof JsonElement) {
+            typeName = ((JsonElement) typeName).getAsString();
         }
-        return new String[]{(String)id,(String)typeName};
+        return new String[]{(String) id, (String) typeName};
     }
 
     @Override

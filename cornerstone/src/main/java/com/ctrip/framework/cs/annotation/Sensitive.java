@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
  * Created by jiang.j on 2017/6/7.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD,ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.TYPE})
 public @interface Sensitive {
 }

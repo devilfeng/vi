@@ -11,49 +11,51 @@ import java.io.InputStream;
  */
 public class PomUtil {
 
-    class NexusPomInfo{
-        String groupId;
-        String artifactId;
-        String version;
-    }
-    class RepoDetail{
-        String repositoryURL;
-    }
-    class SearchResult{
-
-        RepoDetail[] repoDetails;
-        NexusPomInfo[] data;
-    }
-
     static Logger logger = LoggerFactory.getLogger(PomUtil.class);
 
-    public static InputStream getPomInfoByFileName(String[] av,String fileName){
-        return EnFactory.getEnMaven().getPomInfoByFileName(av,fileName);
+    public static InputStream getPomInfoByFileName(String[] av, String fileName) {
+        return EnFactory.getEnMaven().getPomInfoByFileName(av, fileName);
     }
 
-    public static String[] getArtifactIdAndVersion(String fileName){
-        boolean needJudege=false;
-        int versionBeginIndex =-1;
-        for(int i=0;i<fileName.length();i++){
+    public static String[] getArtifactIdAndVersion(String fileName) {
+        boolean needJudege = false;
+        int versionBeginIndex = -1;
+        for (int i = 0; i < fileName.length(); i++) {
             char c = fileName.charAt(i);
-            if(needJudege && Character.isDigit(c)){
+            if (needJudege && Character.isDigit(c)) {
                 versionBeginIndex = i;
                 break;
             }
-            if(c == '-'){
+            if (c == '-') {
                 needJudege = true;
-            }else{
+            } else {
                 needJudege = false;
             }
         }
-        if(versionBeginIndex>0){
+        if (versionBeginIndex > 0) {
 
             return new String[]{
                     fileName.substring(0, versionBeginIndex - 1),
                     fileName.substring(versionBeginIndex)
             };
-        }else{
+        } else {
             return null;
         }
+    }
+
+    class NexusPomInfo {
+        String groupId;
+        String artifactId;
+        String version;
+    }
+
+    class RepoDetail {
+        String repositoryURL;
+    }
+
+    class SearchResult {
+
+        RepoDetail[] repoDetails;
+        NexusPomInfo[] data;
     }
 }

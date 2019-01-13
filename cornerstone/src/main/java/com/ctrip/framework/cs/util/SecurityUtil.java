@@ -1,8 +1,7 @@
 package com.ctrip.framework.cs.util;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
+import com.ctrip.framework.cs.enterprise.EnFactory;
+import com.ctrip.framework.cs.enterprise.MyX509TrustManager;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -10,56 +9,58 @@ import javax.net.ssl.TrustManager;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.ctrip.framework.cs.enterprise.EnFactory;
-import com.ctrip.framework.cs.enterprise.MyX509TrustManager;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.*;
 
 /**
  * Created by jiang.j on 2016/5/3.
  */
 public final class SecurityUtil {
 
-    public final static String USERKEY="vi-user";
-    public final static String TOKENKEY="vi-token";
-    public final static String PERMISSIONKEY="VI-Permission";
-    public final static String JUMPKEY="vi_jump";
-    public final static String DEVUSER="developer";
+    public final static String USERKEY = "vi-user";
+    public final static String TOKENKEY = "vi-token";
+    public final static String PERMISSIONKEY = "VI-Permission";
+    public final static String JUMPKEY = "vi_jump";
+    public final static String DEVUSER = "developer";
     private static String defaultKey = "#@$vi#com!abc";
     private static int tokenInvalidMinute = 40;
-    public static void setSecurityKey(String key){
+    private static SSLSocketFactory VISSLFACTORY = null;
+
+    public static void setSecurityKey(String key) {
         defaultKey = key;
     }
 
-    public static void setTokenInvalidMinute(int minute){
-        tokenInvalidMinute = minute;
-    }
-
-    public static int getTokenInvalidMinute(){
+    public static int getTokenInvalidMinute() {
         return tokenInvalidMinute;
     }
 
-    public static String generateToken(String user,HttpServletRequest req) throws Exception {
-
-        String data = user+"#"+HttpUtil.getIpAddr(req)+"#"+System.currentTimeMillis();
-        return DesUtil.encrypt(data,defaultKey);
+    public static void setTokenInvalidMinute(int minute) {
+        tokenInvalidMinute = minute;
     }
 
-    public static String generateToken(String user,String ip) throws Exception {
+    public static String generateToken(String user, HttpServletRequest req) throws Exception {
 
-        String data = user+"#"+ ip +"#"+System.currentTimeMillis();
-        return DesUtil.encrypt(data,defaultKey);
+        String data = user + "#" + HttpUtil.getIpAddr(req) + "#" + System.currentTimeMillis();
+        return DesUtil.encrypt(data, defaultKey);
     }
 
-    public static void refreshToken(String user,HttpServletRequest req,HttpServletResponse resp) throws Exception {
+    public static String generateToken(String user, String ip) throws Exception {
+
+        String data = user + "#" + ip + "#" + System.currentTimeMillis();
+        return DesUtil.encrypt(data, defaultKey);
+    }
+
+    public static void refreshToken(String user, HttpServletRequest req, HttpServletResponse resp) throws Exception {
         HttpUtil.addCookie(resp, SecurityUtil.TOKENKEY, SecurityUtil.generateToken(user, req), "/", -1);
     }
 
-    public static String getValidUserName(String user,String token,String ip){
+    public static String getValidUserName(String user, String token, String ip) {
 
         String envType = EnFactory.getEnBase().getEnvType();
-         if(envType != null && !"dev".equalsIgnoreCase(envType) && DEVUSER.equals(user)){
-             return null;
-         }
+        if (envType != null && !"dev".equalsIgnoreCase(envType) && DEVUSER.equals(user)) {
+            return null;
+        }
 
         String rtn = null;
         try {
@@ -74,15 +75,15 @@ public final class SecurityUtil {
 
                 }
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
             rtn = null;
         }
         return rtn;
     }
 
-    public static String getValidUserName(HttpServletRequest req){
+    public static String getValidUserName(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
-        if(cookies==null){
+        if (cookies == null) {
             return null;
         }
         String nowUser = "", nowToken = "";
@@ -90,24 +91,22 @@ public final class SecurityUtil {
             for (Cookie cookie : cookies) {
                 String path = cookie.getPath();
                 boolean isRootPath = path == null || path.equals("/");
-                if (cookie.getName().equals(USERKEY) && isRootPath){
+                if (cookie.getName().equals(USERKEY) && isRootPath) {
                     nowUser = cookie.getValue();
-                } else if (cookie.getName().equals(TOKENKEY) && isRootPath){
+                } else if (cookie.getName().equals(TOKENKEY) && isRootPath) {
                     nowToken = cookie.getValue();
                 }
             }
-            return getValidUserName(nowUser,nowToken,HttpUtil.getIpAddr(req));
-        }catch (Throwable e){
+            return getValidUserName(nowUser, nowToken, HttpUtil.getIpAddr(req));
+        } catch (Throwable e) {
             return null;
         }
 
     }
 
+    public static SSLSocketFactory getSSLSocketFactory() throws KeyManagementException, NoSuchProviderException, NoSuchAlgorithmException {
 
-    private static SSLSocketFactory VISSLFACTORY = null;
-    public static SSLSocketFactory getSSLSocketFactory () throws KeyManagementException, NoSuchProviderException, NoSuchAlgorithmException {
-
-        if(VISSLFACTORY == null) {
+        if (VISSLFACTORY == null) {
             TrustManager[] tm = {new MyX509TrustManager()};
             SSLContext sslContext = SSLContext.getInstance("SSL", "SunJSSE");
             sslContext.init(null, tm, new SecureRandom());

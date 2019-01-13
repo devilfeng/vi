@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
  */
 public class CacheRefreshTest {
     @Test
-    public void testCacheObj(){
+    public void testCacheObj() {
         RedisCache cache = new RedisCache("onlytest");
         String rediscacheTypeName = RedisCache.class.getName();
         CacheManager.add(cache);
@@ -22,18 +22,18 @@ public class CacheRefreshTest {
         assertEquals(2, CacheManager.status(RedisCache.class.getName()).size());
 
         try {
-            assertEquals(cache, CacheManager.findCellById("onlytest",rediscacheTypeName));
-            assertNotNull(CacheManager.getStatusById("onlytest",rediscacheTypeName));
-            assertNotNull(CacheManager.getStatusById(id,rediscacheTypeName));
-            assertTrue(CacheManager.refreshById(id,rediscacheTypeName));
-        }catch (Exception e){
+            assertEquals(cache, CacheManager.findCellById("onlytest", rediscacheTypeName));
+            assertNotNull(CacheManager.getStatusById("onlytest", rediscacheTypeName));
+            assertNotNull(CacheManager.getStatusById(id, rediscacheTypeName));
+            assertTrue(CacheManager.refreshById(id, rediscacheTypeName));
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        try{
-            CacheManager.refreshById("moretest1",rediscacheTypeName);
-        }catch (Exception e){
+        try {
+            CacheManager.refreshById("moretest1", rediscacheTypeName);
+        } catch (Exception e) {
 
-            assertEquals(CacheNotFoundException.class,e.getClass());
+            assertEquals(CacheNotFoundException.class, e.getClass());
         }
 
     }

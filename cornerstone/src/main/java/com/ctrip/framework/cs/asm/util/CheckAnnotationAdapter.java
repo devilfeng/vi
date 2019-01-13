@@ -35,7 +35,7 @@ import com.ctrip.framework.cs.asm.Type;
 
 /**
  * An {@link com.ctrip.framework.cs.asm.AnnotationVisitor} that checks that its methods are properly used.
- * 
+ *
  * @author Eric Bruneton
  */
 public class CheckAnnotationAdapter extends AnnotationVisitor {
@@ -81,7 +81,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
 
     @Override
     public void visitEnum(final String name, final String desc,
-            final String value) {
+                          final String value) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);
@@ -95,7 +95,7 @@ public class CheckAnnotationAdapter extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(final String name,
-            final String desc) {
+                                             final String desc) {
         checkEnd();
         checkName(name);
         CheckMethodAdapter.checkDesc(desc, false);

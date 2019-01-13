@@ -9,15 +9,17 @@ import java.util.Map;
 /**
  * Created by jiang.j on 2016/5/18.
  */
-public class TestCache implements CacheCell{
+public class TestCache implements CacheCell {
 
     private String id;
-    private Map<String,Object> status = new HashMap<>();
-    public TestCache(String id){
+    private Map<String, Object> status = new HashMap<>();
+
+    public TestCache(String id) {
         this.id = id;
-        status.put("refreshTime",new Date());
+        status.put("refreshTime", new Date());
 
     }
+
     @Override
     public String id() {
         return this.id;
@@ -25,13 +27,13 @@ public class TestCache implements CacheCell{
 
     @Override
     public boolean refresh() {
-        status.put("refreshTime",new Date());
+        status.put("refreshTime", new Date());
         return true;
     }
 
     @Override
     public Map<String, Object> getStatus() {
-        status.put("visitCount",Math.random()*1000);
+        status.put("visitCount", Math.random() * 1000);
         return status;
     }
 

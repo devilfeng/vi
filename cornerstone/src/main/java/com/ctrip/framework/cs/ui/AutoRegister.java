@@ -25,15 +25,15 @@ public class AutoRegister {
 
     private static final String SCANPATTERNKEY = "vi.scan.pattern";
 
-    private static void scanClass(InputStream stream,Set<String> ignitePlugins,IgniteManager.SimpleLogger simpleLogger){
+    private static void scanClass(InputStream stream, Set<String> ignitePlugins, IgniteManager.SimpleLogger simpleLogger) {
 
         ClassReader classReader = null;
         try {
             classReader = new ClassReader(stream);
             VIClassAnnotationVisitor visitor = new VIClassAnnotationVisitor(Opcodes.ASM5);
             classReader.accept(visitor, ClassReader.SKIP_CODE);
-            String className = classReader.getClassName().replace("/",".");
-            switch (visitor.annotationType()){
+            String className = classReader.getClassName().replace("/", ".");
+            switch (visitor.annotationType()) {
                 case NONE:
                     break;
                 case IGNITE:
@@ -41,10 +41,10 @@ public class AutoRegister {
                     ignitePlugins.add("ignite." + className);
                     break;
                 case COMPONENT:
-                    try{
+                    try {
                         Class<?> componentClass = Class.forName(className);
                         simpleLogger.info("Register component - " + className.substring(className.lastIndexOf('.')) + ", IsSuccess: " + ComponentManager.add(componentClass));
-                    }catch (Throwable e){
+                    } catch (Throwable e) {
                         simpleLogger.error("Auto Register component failed! " + className);
                     }
                     simpleLogger.info(className);
@@ -56,33 +56,34 @@ public class AutoRegister {
 
     }
 
-    private static void findInApp(File directory ,Set<String> ignitePlugins,IgniteManager.SimpleLogger simpleLogger){
+    private static void findInApp(File directory, Set<String> ignitePlugins, IgniteManager.SimpleLogger simpleLogger) {
         // get all the files from a directory
         File[] fList = directory.listFiles();
-        if(fList == null) return;
+        if (fList == null) return;
 
         for (File file : fList) {
             if (file.isFile() && file.getName().endsWith(".class")) {
-                try(InputStream fs = new FileInputStream(file)) {
-                    scanClass(fs,ignitePlugins,simpleLogger);
-                }catch (Throwable e) {
+                try (InputStream fs = new FileInputStream(file)) {
+                    scanClass(fs, ignitePlugins, simpleLogger);
+                } catch (Throwable e) {
                     simpleLogger.error("visit class " + file.getName() + " failed!", e);
                 }
 
             } else if (file.isDirectory()) {
-                findInApp(file,ignitePlugins, simpleLogger);
+                findInApp(file, ignitePlugins, simpleLogger);
             }
         }
     }
-    private static void scanJar(Set<String> ignitePlugins,IgniteManager.SimpleLogger simpleLogger){
+
+    private static void scanJar(Set<String> ignitePlugins, IgniteManager.SimpleLogger simpleLogger) {
 
         String metaPath = "META-INF";
         try {
             Configuration configuration = ConfigurationManager.getConfigInstance();
-            if(configuration.containsKey(SCANPATTERNKEY)){
+            if (configuration.containsKey(SCANPATTERNKEY)) {
 
                 String patternStr = configuration.getString(SCANPATTERNKEY);
-                simpleLogger.warn("Auto scan jar be enabled. Current scan pattern is "+ patternStr);
+                simpleLogger.warn("Auto scan jar be enabled. Current scan pattern is " + patternStr);
                 Pattern pattern = Pattern.compile(patternStr);
                 Enumeration<URL> urls = Thread.currentThread().getContextClassLoader().getResources(metaPath);
 
@@ -95,20 +96,20 @@ public class AutoRegister {
                         URL realUrl = new URL(location);
                         try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
                             ZipEntry ze;
-                            while ((ze = zip.getNextEntry()) != null ){
+                            while ((ze = zip.getNextEntry()) != null) {
                                 String name = ze.getName();
-                                if(pattern.matcher(name).find() && name.endsWith(".class") ) {
-                                    scanClass(zip,ignitePlugins,simpleLogger);
+                                if (pattern.matcher(name).find() && name.endsWith(".class")) {
+                                    scanClass(zip, ignitePlugins, simpleLogger);
                                 }
                             }
                         }
                     }
                 }
-            }else {
+            } else {
                 simpleLogger.warn("Auto scan jar be disabled. Because no scan pattern be set");
 
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -117,16 +118,16 @@ public class AutoRegister {
 
         Set<String> ignitePlugins = ConfigurationManager.getConfigKeys("ignite");
         URL root = Thread.currentThread().getContextClassLoader().getResource("");
-        simpleLogger.info("App root path:"+root);
-        if(root != null) {
+        simpleLogger.info("App root path:" + root);
+        if (root != null) {
             File rootF = new File(root.getFile());
             findInApp(rootF, ignitePlugins, simpleLogger);
         }
 
-        scanJar( ignitePlugins,simpleLogger);
+        scanJar(ignitePlugins, simpleLogger);
 
         //remove default ignite plugin
-        if(ignitePlugins != null) {
+        if (ignitePlugins != null) {
             ignitePlugins.remove("ignite.VICoreIgnite");
         }
 

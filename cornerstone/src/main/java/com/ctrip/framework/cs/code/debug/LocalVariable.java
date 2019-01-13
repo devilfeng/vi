@@ -44,7 +44,7 @@ public class LocalVariable {
 
     @Override
     public String toString() {
-        return " name:"+name+", desc:"+desc+", start:"+start+", end:"+end+", index:"+index;
+        return " name:" + name + ", desc:" + desc + ", start:" + start + ", end:" + end + ", index:" + index;
     }
 
 }

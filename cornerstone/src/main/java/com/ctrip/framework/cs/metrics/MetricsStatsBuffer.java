@@ -6,6 +6,8 @@ import java.util.Arrays;
  * Created by jiang.j on 2016/8/18.
  */
 public class MetricsStatsBuffer {
+    private transient final int MAXSIZE = 800;
+    private transient final int MINSIZE = 50;
     private transient int count;
     private double mean;
     private double sumSquares;
@@ -14,10 +16,7 @@ public class MetricsStatsBuffer {
     private long min;
     private long max;
     private long total;
-
     private boolean needPercentiles = false;
-    private transient final int MAXSIZE=800;
-    private transient final int MINSIZE =50;
     private transient double[] percentiles;
     private transient double[] percentileValues;
     private transient int size = MINSIZE;
@@ -30,7 +29,7 @@ public class MetricsStatsBuffer {
      *                    If no percentileValues are required pass a 0-sized array.
      */
     public MetricsStatsBuffer(double[] percentiles) {
-        if(percentiles!=null && percentiles.length>0){
+        if (percentiles != null && percentiles.length > 0) {
             needPercentiles = true;
             values = new long[size];
             this.percentiles = Arrays.copyOf(percentiles, percentiles.length);
@@ -49,24 +48,24 @@ public class MetricsStatsBuffer {
         snapshot.count = count;
         snapshot.max = max;
         snapshot.min = min;
-        snapshot.stddev =stddev;
-        if(needPercentiles) {
+        snapshot.stddev = stddev;
+        if (needPercentiles) {
             snapshot.percentileValues = this.getPercentileValues();
         }
 
-        if(needPercentiles) {
+        if (needPercentiles) {
             for (int i = 0; i < percentileValues.length; ++i) {
                 percentileValues[i] = 0.0;
             }
 
             if (this.count > this.size * 1.5) {
                 this.size = (int) (this.count * 1.5);
-                if(this.size> MAXSIZE) this.size = MAXSIZE;
+                if (this.size > MAXSIZE) this.size = MAXSIZE;
 
                 this.values = new long[this.size];
             } else if (this.count < this.size * 0.3) {
                 this.size = (int) (this.size * 0.3);
-                if(this.size<MINSIZE) this.size = MINSIZE;
+                if (this.size < MINSIZE) this.size = MINSIZE;
 
                 this.values = new long[this.size];
             } else {
@@ -91,14 +90,14 @@ public class MetricsStatsBuffer {
      * Record a new value for this buffer.
      */
     public void record(long n) {
-        if(needPercentiles) {
+        if (needPercentiles) {
             values[count++ % size] = n;
-        }else{
+        } else {
             count++;
-            if(n > this.max){
+            if (n > this.max) {
                 this.max = n;
             }
-            if(n < this.min){
+            if (n < this.min) {
                 this.min = n;
             }
         }
@@ -119,7 +118,7 @@ public class MetricsStatsBuffer {
         variance = (sumSquares / curSize) - (mean * mean);
         stddev = Math.sqrt(variance);
 
-        if(needPercentiles) {
+        if (needPercentiles) {
             Arrays.sort(values, 0, curSize); // to compute percentileValues
             min = values[0];
             max = values[curSize - 1];
@@ -235,16 +234,16 @@ public class MetricsStatsBuffer {
 
     /**
      * Return the value for the percentile given an index.
+     *
      * @param index If percentiles are [ 95.0, 99.0 ] index must be 0 or 1 to get the 95th
      *              or 99th percentile respectively.
-     *
      * @return The value for the percentile requested.
      */
     public double getPercentileValueForIdx(int index) {
         return percentileValues[index];
     }
 
-    public int getBufferSize(){
-        return needPercentiles?size:0;
+    public int getBufferSize() {
+        return needPercentiles ? size : 0;
     }
 }

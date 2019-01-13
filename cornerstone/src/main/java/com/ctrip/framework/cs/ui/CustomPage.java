@@ -5,6 +5,8 @@ package com.ctrip.framework.cs.ui;
  */
 public interface CustomPage {
     String getId();
+
     String getName();
+
     String getIcon();
 }

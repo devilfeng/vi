@@ -9,11 +9,12 @@ public class DebugInfo {
     private final String owner;
     private final String traceId;
     private final Condition[] conditions;
-    public DebugInfo(final int lineNum,final String traceId){
-        this(lineNum,traceId,null,null);
+
+    public DebugInfo(final int lineNum, final String traceId) {
+        this(lineNum, traceId, null, null);
     }
 
-    public DebugInfo(final int lineNum,final String traceId,Condition[] conditions,String owner){
+    public DebugInfo(final int lineNum, final String traceId, Condition[] conditions, String owner) {
         this.lineNum = lineNum;
         this.traceId = traceId;
         this.conditions = conditions;
@@ -21,15 +22,15 @@ public class DebugInfo {
 
     }
 
-    public int getLineNum(){
+    public int getLineNum() {
         return lineNum;
     }
 
-    public String getTraceId(){
+    public String getTraceId() {
         return traceId;
     }
 
-    public Condition[] getConditions(){
+    public Condition[] getConditions() {
         return this.conditions;
     }
 }

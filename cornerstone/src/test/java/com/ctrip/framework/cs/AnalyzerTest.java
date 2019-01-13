@@ -12,11 +12,9 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by jiang.j on 2016/5/19.
@@ -28,8 +26,9 @@ public class AnalyzerTest {
 
 
     }
+
     @Test
-    public void testAnalyzePom(){
+    public void testAnalyzePom() {
 
         try {
             XMLReader xmlReader = XMLReaderFactory.createXMLReader();
@@ -38,29 +37,29 @@ public class AnalyzerTest {
             xmlReader.parse(new InputSource(this.getClass().getClassLoader().getResourceAsStream("testpom.xml")));
             assertEquals(4, handler.getDependencies().size());
             PomInfo pom = handler.getPomInfo();
-            boolean hasVI=false;
+            boolean hasVI = false;
             for (PomDependency d : handler.getDependencies()) {
                 assertNotNull(d.artifactId);
                 assertNotNull(d.groupId);
                 assertNotNull(d.version);
-                if("framework-validateinternals".equals(d.artifactId)){
-                    hasVI=true;
-                    assertEquals(d.version,"0.9");
+                if ("framework-validateinternals".equals(d.artifactId)) {
+                    hasVI = true;
+                    assertEquals(d.version, "0.9");
                 }
             }
             assertTrue(hasVI);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
     @Test
-    public  void testGetAllJarPom(){
+    public void testGetAllJarPom() {
 
         try {
             List<PomInfo> poms = Analyzer.getAllJarPomInfo();
-            assertTrue(poms.size()>0);
+            assertTrue(poms.size() > 0);
             PomInfo pomInfo = poms.get(0);
             assertNotNull(pomInfo.artifactId);
             System.out.println(pomInfo.artifactId);

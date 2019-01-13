@@ -13,7 +13,7 @@ public class FilterRegistrationCondition implements Condition {
         try {
             Class.forName("org.springframework.boot.context.embedded.FilterRegistrationBean");
             return true;
-        }catch (Throwable e){
+        } catch (Throwable e) {
             return false;
         }
     }

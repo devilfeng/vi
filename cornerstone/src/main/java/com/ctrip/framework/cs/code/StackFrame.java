@@ -7,9 +7,12 @@ import java.util.Map;
  */
 public interface StackFrame {
 
-    Map<String, Object> getLocals() ;
+    Map<String, Object> getLocals();
+
     Map<String, Object> getFields();
+
     Map<String, Object> getStaticFields();
-    StackTraceElement[] getStacktrace() ;
+
+    StackTraceElement[] getStacktrace();
 
 }

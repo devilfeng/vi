@@ -10,6 +10,6 @@ import java.security.ProtectionDomain;
 public class CodeTransformer implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-                return AgentTool.transformClass(classfileBuffer,className);
+        return AgentTool.transformClass(classfileBuffer, className);
     }
 }

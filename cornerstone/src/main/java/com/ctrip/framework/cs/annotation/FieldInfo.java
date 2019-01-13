@@ -11,18 +11,20 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
 public @interface FieldInfo {
-    public enum FieldType{
-        Txt,
-        Bytes,
-        Number,
-        Date
-    }
-
     /**
      * the value indicating a version number since this member
      * or type has been present.
      */
     String name();
+
     String description() default "";
+
     FieldType type() default FieldType.Txt;
+
+    public enum FieldType {
+        Txt,
+        Bytes,
+        Number,
+        Date
+    }
 }

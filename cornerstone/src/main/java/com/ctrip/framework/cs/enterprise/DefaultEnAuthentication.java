@@ -8,7 +8,7 @@ import java.util.Map;
 public class DefaultEnAuthentication implements EnAuthentication {
 
     @Override
-    public String authentication(String user, String token, String ip,String requestUrl, Map<String, Object> parameters) throws AuthenticationFailedException {
+    public String authentication(String user, String token, String ip, String requestUrl, Map<String, Object> parameters) throws AuthenticationFailedException {
         return "admin";
     }
 
@@ -19,6 +19,6 @@ public class DefaultEnAuthentication implements EnAuthentication {
 
     @Override
     public String getLogoutUrl(String reqUrl) {
-        return reqUrl.substring(0,reqUrl.lastIndexOf('/'));
+        return reqUrl.substring(0, reqUrl.lastIndexOf('/'));
     }
 }

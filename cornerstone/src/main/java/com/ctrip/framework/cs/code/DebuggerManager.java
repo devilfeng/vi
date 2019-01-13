@@ -12,26 +12,29 @@ public final class DebuggerManager {
     static Debugger debugger;
     private static boolean isDefault = true;
     private static Logger logger = LoggerFactory.getLogger(DebuggerManager.class);
+
     static {
         try {
             debugger = new DefaultDebugger();
-        }catch (Throwable e){
-            logger.error("init error",e);
+        } catch (Throwable e) {
+            logger.error("init error", e);
         }
 
     }
 
-    public static boolean isDefaultDebugger(){
+    public static boolean isDefaultDebugger() {
 
         return isDefault;
     }
-    public static void setDebugger(Debugger newDebugger){
-        if(newDebugger!= null && !(newDebugger instanceof  DefaultDebugger)) {
+
+    public static void setDebugger(Debugger newDebugger) {
+        if (newDebugger != null && !(newDebugger instanceof DefaultDebugger)) {
             debugger = newDebugger;
             isDefault = false;
         }
     }
-    public static Debugger getCurrent(){
+
+    public static Debugger getCurrent() {
         return debugger;
     }
 }

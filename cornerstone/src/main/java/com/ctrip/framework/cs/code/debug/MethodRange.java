@@ -7,25 +7,25 @@ public class MethodRange {
     private int start;
     private int end;
 
-    public void update(int lineNum){
-        if(lineNum<start || start==0){
-           start = lineNum;
+    public void update(int lineNum) {
+        if (lineNum < start || start == 0) {
+            start = lineNum;
         }
 
-        if(lineNum > end){
+        if (lineNum > end) {
             end = lineNum;
         }
     }
 
-    public boolean isInRange(int lineNum){
-        return lineNum>= this.start && lineNum <= this.end;
+    public boolean isInRange(int lineNum) {
+        return lineNum >= this.start && lineNum <= this.end;
     }
 
-    public int getStart(){
+    public int getStart() {
         return start;
     }
 
-    public int getEnd(){
+    public int getEnd() {
         return end;
     }
 }

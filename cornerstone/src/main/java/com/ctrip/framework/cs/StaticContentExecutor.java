@@ -1,9 +1,9 @@
 package com.ctrip.framework.cs;
 
-import com.ctrip.framework.cs.ui.Menu;
 import com.ctrip.framework.cs.enterprise.EnAuthentication;
 import com.ctrip.framework.cs.enterprise.EnFactory;
 import com.ctrip.framework.cs.enterprise.EnHost;
+import com.ctrip.framework.cs.ui.Menu;
 import com.ctrip.framework.cs.util.IOUtils;
 import com.ctrip.framework.cs.util.IPUtil;
 import com.ctrip.framework.cs.util.SecurityUtil;
@@ -71,6 +71,9 @@ public class StaticContentExecutor {
      */
     final static Map<String, String> EXT_TO_MEDIATYPE = new HashMap<>();
     final static String WEBPATH = "cornerstone-web";
+    final static ConcurrentHashMap<String, byte[]> CONTENT_CACHE = new ConcurrentHashMap<>();
+    static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     static {
         EXT_TO_MEDIATYPE.put("js", "text/javascript");
         EXT_TO_MEDIATYPE.put("png", "image/png");
@@ -81,39 +84,33 @@ public class StaticContentExecutor {
         EXT_TO_MEDIATYPE.put("html", "text/html");
     }
 
-    final static ConcurrentHashMap<String, byte[]> CONTENT_CACHE = new ConcurrentHashMap<>();
-
-    static Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-
-    public static RequestResult getContent(String reqUrl,String rootPath,String callPath,Map<String,Object> params,String user,String token,String remoteIp,String autoJumpUrl){
+    public static RequestResult getContent(String reqUrl, String rootPath, String callPath, Map<String, Object> params, String user, String token, String remoteIp, String autoJumpUrl) {
         {
 
             RequestResult rtn = new RequestResult();
             boolean isIndexHtml = false;
-            if(!IPUtil.internalIp(remoteIp)){
+            if (!IPUtil.internalIp(remoteIp)) {
                 return null;
             }
 
             String path = callPath;
             String viRootPath = rootPath;
 
-            if(path==null) {
+            if (path == null) {
                 rtn.jumpUrl = viRootPath + "/index.html";
                 return rtn;
-            }
-            else if(path.equals("/health") || path.equals("/health/detail")){
-                String validUser= SecurityUtil.getValidUserName(user,token,remoteIp);
+            } else if (path.equals("/health") || path.equals("/health/detail")) {
+                String validUser = SecurityUtil.getValidUserName(user, token, remoteIp);
                 VIApiHandler handler = VIApiHandler.getInstance();
                 VIApiHandler.ExeResult exeResult = handler.executeService(path, validUser, params);
 
                 rtn.headers.put("Access-Control-Allow-Origin", "*");
-                rtn.headers.put("Access-Control-Allow-Headers","Content-Type, Accept");
-                rtn.headers.put("Access-Control-Expose-Headers",SecurityUtil.PERMISSIONKEY);
+                rtn.headers.put("Access-Control-Allow-Headers", "Content-Type, Accept");
+                rtn.headers.put("Access-Control-Expose-Headers", SecurityUtil.PERMISSIONKEY);
                 rtn.contentType = "application/json";
                 rtn.responseCode = exeResult.getResponseCode();
                 Object resultData = exeResult.getData();
-                if(resultData!=null) {
+                if (resultData != null) {
                     rtn.content = (new Gson().toJson(resultData).getBytes(Charset.forName("UTF-8")));
                 }
                 return rtn;
@@ -121,35 +118,34 @@ public class StaticContentExecutor {
             }
 
 
-            if(path.equals("/logout")) {
+            if (path.equals("/logout")) {
                 rtn.needCleanCookie = true;
                 rtn.jumpUrl = EnFactory.getEnAuthentication().getLogoutUrl(reqUrl);
                 return rtn;
 
-            }else if(path.equals("/index.html")){
+            } else if (path.equals("/index.html")) {
 
                 String envType = EnFactory.getEnBase().getEnvType();
                 isIndexHtml = true;
-                if(envType == null || "dev".equals(envType.toLowerCase())){
+                if (envType == null || "dev".equals(envType.toLowerCase())) {
 
                     try {
-                        rtn.user ="developer";
+                        rtn.user = "developer";
                         rtn.token = SecurityUtil.generateToken(rtn.user, remoteIp);
                     } catch (Throwable e) {
-                        logger.error("mock dev user failed",e);
+                        logger.error("mock dev user failed", e);
                     }
-                }
-                else{
+                } else {
                     EnAuthentication enAuthentication = EnFactory.getEnAuthentication();
                     try {
-                        String nowUser = enAuthentication.authentication(user,token,remoteIp,reqUrl,params);
-                        if(nowUser == null){
-                            rtn.jumpUrl =  enAuthentication.getJumpUrl(reqUrl);
+                        String nowUser = enAuthentication.authentication(user, token, remoteIp, reqUrl, params);
+                        if (nowUser == null) {
+                            rtn.jumpUrl = enAuthentication.getJumpUrl(reqUrl);
                             return rtn;
-                        }else{
+                        } else {
                             rtn.user = nowUser;
-                            rtn.token =SecurityUtil.generateToken(rtn.user,remoteIp);
-                            if(autoJumpUrl != null){
+                            rtn.token = SecurityUtil.generateToken(rtn.user, remoteIp);
+                            if (autoJumpUrl != null) {
                                 rtn.jumpUrl = autoJumpUrl;
                                 return rtn;
                             }
@@ -157,14 +153,14 @@ public class StaticContentExecutor {
                         }
                     } catch (Throwable e) {
                         rtn.jumpUrl = enAuthentication.getLogoutUrl(reqUrl);
-                        logger.warn("vi authentication failed! jump to"+rtn.jumpUrl,e);
+                        logger.warn("vi authentication failed! jump to" + rtn.jumpUrl, e);
                         return rtn;
                     }
                 }
 
             }
 
-            String ext = path.substring(path.lastIndexOf(".")+1);
+            String ext = path.substring(path.lastIndexOf(".") + 1);
             String mediaType = EXT_TO_MEDIATYPE.get(ext);
             byte[] contentBytes = null;
 
@@ -173,7 +169,7 @@ public class StaticContentExecutor {
                 InputStream is = StaticContentExecutor.class.getClassLoader().getResourceAsStream(WEBPATH + path);
                 if (is != null) {
                     try {
-                        if(!isIndexHtml) {
+                        if (!isIndexHtml) {
                             ByteArrayOutputStream os = new ByteArrayOutputStream(4096);
                             byte[] bs = new byte[4096];
                             int c = 0;
@@ -182,17 +178,17 @@ public class StaticContentExecutor {
                             }
                             contentBytes = os.toByteArray();
                             CONTENT_CACHE.putIfAbsent(path, contentBytes);
-                        }else{
+                        } else {
                             String indexHtml = IOUtils.readAll(is);
                             String pattern = "//$SMENU";
-                            int menuIndex =  indexHtml.indexOf(pattern);
-                            if(menuIndex > 0){
+                            int menuIndex = indexHtml.indexOf(pattern);
+                            if (menuIndex > 0) {
                                 List<Menu> menus = EnFactory.getEnUI().getMenus();
                                 Gson gson = new Gson();
                                 EnHost enHost = EnFactory.getEnHost();
-                                indexHtml = indexHtml.substring(0,menuIndex) + "$SMENU = " + gson.toJson(menus) +
-                                        ";$CIP='"+enHost.getHostAddress()+"';$CHOSTNAME='"+enHost.getHostName()+"';"
-                                        + indexHtml.substring(menuIndex+pattern.length());
+                                indexHtml = indexHtml.substring(0, menuIndex) + "$SMENU = " + gson.toJson(menus) +
+                                        ";$CIP='" + enHost.getHostAddress() + "';$CHOSTNAME='" + enHost.getHostName() + "';"
+                                        + indexHtml.substring(menuIndex + pattern.length());
                             }
                             contentBytes = indexHtml.getBytes();
 
@@ -210,10 +206,10 @@ public class StaticContentExecutor {
 
             if (contentBytes == null) {
                 return null;
-            }else {
+            } else {
 
                 rtn.headers.put("Access-Control-Allow-Origin", "*");
-                rtn.headers.put("Access-Control-Allow-Headers","Content-Type, Accept");
+                rtn.headers.put("Access-Control-Allow-Headers", "Content-Type, Accept");
                 rtn.contentType = mediaType;
                 rtn.responseCode = HttpServletResponse.SC_OK;
                 rtn.content = contentBytes;

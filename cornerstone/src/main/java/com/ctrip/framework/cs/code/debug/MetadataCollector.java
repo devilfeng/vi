@@ -10,7 +10,7 @@ import java.util.Map;
  * Modified by jiang.j
  */
 
-public class MetadataCollector  extends ClassVisitor {
+public class MetadataCollector extends ClassVisitor {
     private final ClassMetadata classMetadata;
     private String className;
 
@@ -53,7 +53,7 @@ public class MetadataCollector  extends ClassVisitor {
         final String methodUniqueName = methodName + desc;
         final String methodDesc = desc;
         classMetadata.addMethod(methodUniqueName);
-        if(access != Opcodes.ACC_PRIVATE && desc.startsWith("()")){
+        if (access != Opcodes.ACC_PRIVATE && desc.startsWith("()")) {
             classMetadata.markPossibleProp(methodUniqueName);
         }
         return new MethodVisitor(Opcodes.ASM5, superMV) {
@@ -62,17 +62,17 @@ public class MetadataCollector  extends ClassVisitor {
             @Override
             public void visitLineNumber(final int line, final Label start) {
                 labelLineMapping.put(start.toString(), line);
-                classMetadata.addMethodLineNum(methodUniqueName,line);
+                classMetadata.addMethodLineNum(methodUniqueName, line);
             }
 
             @Override
             public void visitFieldInsn(int opcode, String owner, String name,
                                        String desc) {
 
-                if(className.equals(owner) && methodDesc.equals("()"+desc)) {
+                if (className.equals(owner) && methodDesc.equals("()" + desc)) {
                     //System.out.println(owner + "." + name);
                     //System.out.println(methodUniqueName);
-                    classMetadata.addPropMethodField(methodUniqueName,name+"#"+desc);
+                    classMetadata.addPropMethodField(methodUniqueName, name + "#" + desc);
                 }
             }
 
@@ -102,7 +102,6 @@ public class MetadataCollector  extends ClassVisitor {
             }
 
 
-
             @Override
             public void visitIntInsn(int opcode, int operand) {
                 classMetadata.cleanPropMethodField(methodUniqueName);
@@ -116,7 +115,7 @@ public class MetadataCollector  extends ClassVisitor {
                                            final Label start,
                                            final Label end,
                                            final int index) {
-                if(!"this".equals(name)) {
+                if (!"this".equals(name)) {
                     classMetadata.cleanPropMethodField(methodUniqueName);
                 }
                 super.visitLocalVariable(name, desc, signature, start, end, index);

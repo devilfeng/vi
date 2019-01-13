@@ -10,7 +10,7 @@ import javax.servlet.ServletRegistration;
  */
 final class ServletRegister {
 
-protected static final void regiesterVIServlet(ServletContext context,Logger logger){
+    protected static final void regiesterVIServlet(ServletContext context, Logger logger) {
 
         try {
             ServletRegistration.Dynamic asr = context.addServlet("VIApiServlet", VIApiServlet.class);
@@ -29,8 +29,8 @@ protected static final void regiesterVIServlet(ServletContext context,Logger log
                 logger.warn("Servlet VIHttpServlet already exists");
             }
 
-        }catch (Throwable e){
-            logger.error("VI register servlet failed",e);
+        } catch (Throwable e) {
+            logger.error("VI register servlet failed", e);
         }
     }
 }

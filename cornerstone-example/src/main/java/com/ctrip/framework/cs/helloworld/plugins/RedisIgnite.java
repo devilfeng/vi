@@ -1,7 +1,6 @@
 package com.ctrip.framework.cs.helloworld.plugins;
 
 import com.ctrip.framework.cs.AppInfo;
-
 import com.ctrip.framework.cs.AppStatus;
 import com.ctrip.framework.cs.IgniteManager;
 import com.ctrip.framework.cs.annotation.Ignite;
@@ -17,8 +16,8 @@ import java.util.Map;
 /**
  * Created by jiang.j on 2016/8/22.
  */
-@Ignite(id = "redis.ignite",type = Ignite.PluginType.Component)
-public class RedisIgnite extends AbstractIgnitePlugin implements IgnitePlugin,AppInfo.StatusChangeListener{
+@Ignite(id = "redis.ignite", type = Ignite.PluginType.Component)
+public class RedisIgnite extends AbstractIgnitePlugin implements IgnitePlugin, AppInfo.StatusChangeListener {
     Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -36,15 +35,15 @@ public class RedisIgnite extends AbstractIgnitePlugin implements IgnitePlugin,Ap
 
     @Override
     public Map<String, String> coreConfigs() {
-        Map<String,String> rtn = new HashMap<>();
-        rtn.put("maxKey","100");
-        rtn.put("timeout","3000");
+        Map<String, String> rtn = new HashMap<>();
+        rtn.put("maxKey", "100");
+        rtn.put("timeout", "3000");
         return rtn;
     }
 
     @Override
     public boolean selfCheck(IgniteManager.SimpleLogger logger) {
-       logger.info("Redis server is OK");
+        logger.info("Redis server is OK");
 
         return true;
     }
@@ -52,6 +51,6 @@ public class RedisIgnite extends AbstractIgnitePlugin implements IgnitePlugin,Ap
 
     @Override
     public void statusChanged(AppStatus oldStatus, AppStatus newStatus) {
-        logger.info("Status changed! from "+oldStatus+" to "+newStatus);
+        logger.info("Status changed! from " + oldStatus + " to " + newStatus);
     }
 }

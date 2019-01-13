@@ -9,7 +9,7 @@ import org.junit.Test;
 public class ProcessInfoTest {
 
     @Test
-    public void testGetProcess(){
+    public void testGetProcess() {
 
         ProcessInfo processInfo = new ProcessInfo();
     }

@@ -5,6 +5,8 @@ package com.ctrip.framework.cs.metrics;
  */
 public interface MetricDefine {
     String valueDescription();
+
     String valueTransFunc();
+
     Class<? extends Enum> tags();
 }

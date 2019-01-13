@@ -1,13 +1,13 @@
 package com.ctrip.framework.cs.code;
 
 import com.ctrip.framework.cs.NoPermissionException;
-import com.ctrip.framework.cs.ViFunctionHandler;
-import com.ctrip.framework.cs.code.debug.DebugTool;
-import com.ctrip.framework.cs.configuration.ConfigurationManager;
 import com.ctrip.framework.cs.NotFoundException;
 import com.ctrip.framework.cs.Permission;
+import com.ctrip.framework.cs.ViFunctionHandler;
 import com.ctrip.framework.cs.code.debug.Condition;
+import com.ctrip.framework.cs.code.debug.DebugTool;
 import com.ctrip.framework.cs.code.debug.DefaultDebugger;
+import com.ctrip.framework.cs.configuration.ConfigurationManager;
 import com.ctrip.framework.cs.enterprise.EnApp;
 import com.ctrip.framework.cs.enterprise.EnFactory;
 import com.ctrip.framework.cs.instrument.AgentTool;
@@ -27,64 +27,64 @@ public class CodeHandler implements ViFunctionHandler {
 
     private Object getCaptureFrames(Map<String, Object> params) throws NotFoundException {
 
-        Object rtn =null;
+        Object rtn = null;
         String traceId = (String) params.get("traceid");
-        if(traceId == null) {
-            rtn ="wrong trace id";
+        if (traceId == null) {
+            rtn = "wrong trace id";
             return rtn;
         }
         StackFrame stackFrame = DebuggerManager.getCurrent().getCapturedFrame(traceId);
-        if(stackFrame == null){
+        if (stackFrame == null) {
             return null;
         }
-        Map<String,Object> data = new HashMap<>();
-        Map<String,Object> staticFields = new HashMap<>();
-        Map<String,Object> fields = new HashMap<>();
-        Map<String,Object> locals = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> staticFields = new HashMap<>();
+        Map<String, Object> fields = new HashMap<>();
+        Map<String, Object> locals = new HashMap<>();
 
-        if(stackFrame.getStaticFields()!=null) {
+        if (stackFrame.getStaticFields() != null) {
             staticFields = stackFrame.getStaticFields();
         }
-        data.put("staticFields",staticFields);
-        if(stackFrame.getFields()!=null) {
+        data.put("staticFields", staticFields);
+        if (stackFrame.getFields() != null) {
             fields = stackFrame.getFields();
         }
-        data.put("fields",fields);
+        data.put("fields", fields);
 
-        if(stackFrame.getLocals()!=null) {
+        if (stackFrame.getLocals() != null) {
             locals = stackFrame.getLocals();
         }
-        data.put("locals",locals);
-        data.put("stackTrace",stackFrame.getStacktrace());
+        data.put("locals", locals);
+        data.put("stackTrace", stackFrame.getStacktrace());
         rtn = data;
         return rtn;
     }
 
-    private Object registerBreakpoint(Map<String, Object> params,String user) throws Exception {
+    private Object registerBreakpoint(Map<String, Object> params, String user) throws Exception {
 
         Object rtn = null;
         Debugger debugger = DebuggerManager.getCurrent();
 
         boolean hasConditionsKey = params.containsKey("conditions");
         boolean isConditionBP = debugger instanceof DefaultDebugger && hasConditionsKey;
-        if(DebuggerManager.getCurrent().startup()) {
-            if(isConditionBP){
+        if (DebuggerManager.getCurrent().startup()) {
+            if (isConditionBP) {
                 Gson gson = new Gson();
-                JsonObject rawObj =  gson.fromJson(HttpUtil.getJsonParamVal(params.get("conditions")), JsonObject.class);
-                Condition[] conditionList =  gson.fromJson(rawObj.getAsJsonArray("d"),Condition[].class);
+                JsonObject rawObj = gson.fromJson(HttpUtil.getJsonParamVal(params.get("conditions")), JsonObject.class);
+                Condition[] conditionList = gson.fromJson(rawObj.getAsJsonArray("d"), Condition[].class);
                 DefaultDebugger defaultDebugger = (DefaultDebugger) debugger;
-                rtn = defaultDebugger.registerBreakpoint(HttpUtil.getJsonParamVal(params.get("source")), Integer.parseInt(HttpUtil.getJsonParamVal(params.get("line"))),HttpUtil.getJsonParamVal(params.get("breakpointid")),conditionList,user);
+                rtn = defaultDebugger.registerBreakpoint(HttpUtil.getJsonParamVal(params.get("source")), Integer.parseInt(HttpUtil.getJsonParamVal(params.get("line"))), HttpUtil.getJsonParamVal(params.get("breakpointid")), conditionList, user);
 
-            }else {
-                if(!hasConditionsKey) {
+            } else {
+                if (!hasConditionsKey) {
                     rtn = debugger.registerBreakpoint(HttpUtil.getJsonParamVal(params.get("source")), Integer.parseInt(HttpUtil.getJsonParamVal(params.get("line"))),
                             HttpUtil.getJsonParamVal(params.get("breakpointid")));
-                }else{
+                } else {
                     rtn = debugger.registerBreakpoint(HttpUtil.getJsonParamVal(params.get("source")), Integer.parseInt(HttpUtil.getJsonParamVal(params.get("line"))),
-                            HttpUtil.getJsonParamVal(params.get("breakpointid")),HttpUtil.getJsonParamVal(params.get("conditions")));
+                            HttpUtil.getJsonParamVal(params.get("breakpointid")), HttpUtil.getJsonParamVal(params.get("conditions")));
                 }
             }
-        }else{
+        } else {
             throw new Exception("Debugger start failed! Cannot debug!");
         }
         return rtn;
@@ -92,26 +92,26 @@ public class CodeHandler implements ViFunctionHandler {
 
     @Override
     public Object execute(String path, String user, int permission, Logger logger, Map<String, Object> params) throws Exception {
-        Object rtn=null;
+        Object rtn = null;
         String opPath = path.substring(startPath.length()).toLowerCase();
 
-        switch (opPath){
+        switch (opPath) {
             case "gitinfo":
-                Map<String,String> gitInfo = new HashMap<>();
+                Map<String, String> gitInfo = new HashMap<>();
                 gitInfo.put("url", ConfigurationManager.getConfigInstance().getString("vi.git.api.url"));
                 EnApp currentApp = EnFactory.getEnApp();
-                gitInfo.put("commitId",currentApp.getGitCommitId());
-                gitInfo.put("prjPath",currentApp.getGitPrjPath());
+                gitInfo.put("commitId", currentApp.getGitCommitId());
+                gitInfo.put("prjPath", currentApp.getGitPrjPath());
 
                 rtn = gitInfo;
                 break;
 
             case "registerbreakpoint":
-                if(user == null){
-                    logger.warn("NoPermissionException "+ path+" "+user);
-                    throw  new NoPermissionException();
+                if (user == null) {
+                    logger.warn("NoPermissionException " + path + " " + user);
+                    throw new NoPermissionException();
                 }
-                rtn = registerBreakpoint(params,user);
+                rtn = registerBreakpoint(params, user);
                 break;
             case "enabledebug":
                 rtn = DebuggerManager.getCurrent().startup();
@@ -126,12 +126,12 @@ public class CodeHandler implements ViFunctionHandler {
                 break;
             case "getcodepath":
                 String ns = (String) params.get("ns");
-                String fileName = (String)params.get("name");
-                if(ns == null) {
-                    rtn ="wrong namespace";
+                String fileName = (String) params.get("name");
+                if (ns == null) {
+                    rtn = "wrong namespace";
                     return rtn;
                 }
-                rtn = SourceCodeHelper.getCodePath(ns,fileName);
+                rtn = SourceCodeHelper.getCodePath(ns, fileName);
                 break;
             case "gettracekey":
                 rtn = DebugTool.getTraceIdKey();

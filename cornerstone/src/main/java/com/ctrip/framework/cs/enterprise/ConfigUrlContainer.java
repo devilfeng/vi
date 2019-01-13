@@ -8,18 +8,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConfigUrlContainer {
 
-    private static Map<Integer,String> container = new ConcurrentHashMap<>();
+    private static Map<Integer, String> container = new ConcurrentHashMap<>();
 
-    public static int addUrl(String url){
+    public static int addUrl(String url) {
         int key = url.hashCode();
-        if(key <0){
+        if (key < 0) {
             key = key * -1;
         }
-        container.put(key,url);
+        container.put(key, url);
         return key;
     }
 
-    public static String getUrl(int key){
+    public static String getUrl(int key) {
         return container.get(key);
     }
 }

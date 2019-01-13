@@ -5,9 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.CharBuffer;
 
-import static com.ctrip.framework.cs.netty.http.CookieUtil.firstInvalidCookieNameOctet;
-import static com.ctrip.framework.cs.netty.http.CookieUtil.firstInvalidCookieValueOctet;
-import static com.ctrip.framework.cs.netty.http.CookieUtil.unwrapValue;
+import static com.ctrip.framework.cs.netty.http.CookieUtil.*;
 
 /**
  * Created by jiang.j on 2017/2/14.

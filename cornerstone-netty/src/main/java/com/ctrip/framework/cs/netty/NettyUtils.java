@@ -22,11 +22,11 @@ import java.util.Set;
  */
 public class NettyUtils {
 
-    public final static String getCookieValueByName(Set<Cookie> cookies,String name){
+    public final static String getCookieValueByName(Set<Cookie> cookies, String name) {
         String rtn = null;
-        for(Cookie cookie:cookies){
+        for (Cookie cookie : cookies) {
             String path = cookie.path();
-            if(cookie.name().equals(name) && (path == null || "/".equals(path))){
+            if (cookie.name().equals(name) && (path == null || "/".equals(path))) {
                 rtn = cookie.value();
                 break;
             }
@@ -42,32 +42,34 @@ public class NettyUtils {
     }
 
 
-    public static Map<String,Object> loadPostReqParams(HttpContent content){
+    public static Map<String, Object> loadPostReqParams(HttpContent content) {
 
-        Map<String,Object> params =null;
+        Map<String, Object> params = null;
 
         try {
             Gson gson = new Gson();
-            Type paraMap = new TypeToken<Map<String, JsonElement>>(){}.getType();
+            Type paraMap = new TypeToken<Map<String, JsonElement>>() {
+            }.getType();
             ByteBufInputStream in = new ByteBufInputStream(content.content());
             String rawJson = IOUtils.readAll(in);
-            params = gson.fromJson(rawJson,paraMap);
+            params = gson.fromJson(rawJson, paraMap);
         } catch (IOException e) {
             e.printStackTrace();
         }
         return params;
     }
-    public final static Map<String,Object> getReqParams(HttpRequest req,String reqIP){
 
-        Map<String,Object> params = new HashMap<>();
+    public final static Map<String, Object> getReqParams(HttpRequest req, String reqIP) {
+
+        Map<String, Object> params = new HashMap<>();
         QueryStringDecoder decoder = new QueryStringDecoder(req.getUri());
 
 
-        for(Map.Entry<String,List<String>> para :decoder.parameters().entrySet()){
+        for (Map.Entry<String, List<String>> para : decoder.parameters().entrySet()) {
 
-            params.put(para.getKey(),para.getValue().get(0));
+            params.put(para.getKey(), para.getValue().get(0));
         }
-        params.put("req_ip",reqIP);
+        params.put("req_ip", reqIP);
         return params;
     }
 }

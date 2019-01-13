@@ -15,7 +15,18 @@ public class EventLoggerTest {
 
     static final String msg = "hello world";
     static int fireCount = 0;
-    public static class TestEventLogger implements EventLogger{
+
+    @Test
+    public void testLogger() throws InterruptedException {
+        EventLoggerFactory.addLogger(TestEventLogger.class);
+        EventLogger logger = EventLoggerFactory.getLogger(getClass());
+
+        logger.fireEvent(msg, "great", "good");
+        Thread.sleep(200);
+        assertTrue(fireCount > 0);
+    }
+
+    public static class TestEventLogger implements EventLogger {
 
         @Override
         public void fireEvent(String message, Object... args) {
@@ -25,15 +36,5 @@ public class EventLoggerTest {
             assertTrue(args[1] instanceof Object[]);
             fireCount++;
         }
-    }
-
-    @Test
-    public void testLogger() throws InterruptedException {
-        EventLoggerFactory.addLogger(TestEventLogger.class);
-        EventLogger logger = EventLoggerFactory.getLogger(getClass());
-
-        logger.fireEvent(msg,"great","good");
-        Thread.sleep(200);
-        assertTrue(fireCount > 0);
     }
 }

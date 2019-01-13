@@ -3,8 +3,7 @@ package com.ctrip.framework.cs.ui;
 /**
  * Created by jiang.j on 2016/11/1.
  */
-public class BuildInFileLog implements BuildInPage
-{
+public class BuildInFileLog implements BuildInPage {
     @Override
     public String getId() {
         return "Log";

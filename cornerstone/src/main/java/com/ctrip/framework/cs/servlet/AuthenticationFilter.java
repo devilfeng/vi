@@ -1,7 +1,7 @@
 package com.ctrip.framework.cs.servlet;
 
-import com.ctrip.framework.cs.util.SecurityUtil;
 import com.ctrip.framework.cs.util.HttpUtil;
+import com.ctrip.framework.cs.util.SecurityUtil;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -23,25 +23,25 @@ public class AuthenticationFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String contextPath = httpRequest.getContextPath();
-        if(contextPath==null){
+        if (contextPath == null) {
             contextPath = "";
         }
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
-        if(!path.startsWith(contextPath+"/@in/") && !path.equalsIgnoreCase(contextPath+"/@in")) {
+        if (!path.startsWith(contextPath + "/@in/") && !path.equalsIgnoreCase(contextPath + "/@in")) {
 
             String user = SecurityUtil.getValidUserName(httpRequest);
             String reqUrl = httpRequest.getRequestURL().toString().toLowerCase();
 
             if (user == null) {
-                String uri= contextPath+"/@in/index.html";
+                String uri = contextPath + "/@in/index.html";
                 HttpUtil.addCookie(httpResponse, SecurityUtil.JUMPKEY, reqUrl, "/", -1);
                 httpResponse.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
                 httpResponse.setHeader("Location", uri);
                 return;
             }
         }
-        chain.doFilter(request,response);
+        chain.doFilter(request, response);
     }
 
     @Override

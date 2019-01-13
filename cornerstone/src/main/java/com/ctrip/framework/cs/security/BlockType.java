@@ -4,21 +4,18 @@ package com.ctrip.framework.cs.security;
  * Created by jiang.j on 2017/5/8.
  */
 public enum BlockType {
-    NONE((byte)0),BlackIP((byte)1),GrayIP((byte)2),
-    BlackClientID((byte)3),GrayClientID((byte)4),
-    BlackClientToken((byte)5),GrayClientToken((byte)6),
-    BlackACID((byte)7),GrayACID((byte)8);
+    NONE((byte) 0), BlackIP((byte) 1), GrayIP((byte) 2),
+    BlackClientID((byte) 3), GrayClientID((byte) 4),
+    BlackClientToken((byte) 5), GrayClientToken((byte) 6),
+    BlackACID((byte) 7), GrayACID((byte) 8);
     private byte value;
-    private BlockType(byte n){
-       this.value = n;
+
+    private BlockType(byte n) {
+        this.value = n;
     }
 
-    public byte getValue(){
-        return this.value;
-    }
-
-    public static BlockType fromInt(int value){
-        switch (value){
+    public static BlockType fromInt(int value) {
+        switch (value) {
             case 1:
                 return BlackIP;
             case 2:
@@ -37,6 +34,10 @@ public enum BlockType {
                 return GrayACID;
         }
         return NONE;
+    }
+
+    public byte getValue() {
+        return this.value;
     }
 
 }

@@ -15,6 +15,6 @@ public class RequestResult {
     public String contentType;
     public String user;
     public String token;
-    public Map<String,String> headers = new HashMap<>();
+    public Map<String, String> headers = new HashMap<>();
     public InputStream streamContent = null;
 }

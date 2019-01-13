@@ -29,7 +29,7 @@ public class ClassField {
 
     @Override
     public String toString() {
-        return "access:"+access+", name:"+name+", desc:"+desc;
+        return "access:" + access + ", name:" + name + ", desc:" + desc;
     }
 
 }

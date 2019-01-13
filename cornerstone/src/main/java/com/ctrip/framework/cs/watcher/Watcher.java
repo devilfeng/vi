@@ -5,12 +5,13 @@ package com.ctrip.framework.cs.watcher;
  */
 public class Watcher {
 
-    public interface Executor{
-
-       Object execute(Object... params);
-    }
-    public static Object doInWatch(Executor executor,Object... params){
+    public static Object doInWatch(Executor executor, Object... params) {
         return executor.execute(params);
+    }
+
+    public interface Executor {
+
+        Object execute(Object... params);
     }
 
 }

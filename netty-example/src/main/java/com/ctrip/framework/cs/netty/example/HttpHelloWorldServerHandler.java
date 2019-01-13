@@ -3,11 +3,11 @@ package com.ctrip.framework.cs.netty.example;
 /**
  * Created by jiang.j on 2016/12/20.
  */
+
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.*;
 
 import java.net.URI;
 
@@ -26,7 +26,7 @@ public class HttpHelloWorldServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if(msg instanceof  HttpContent){
+        if (msg instanceof HttpContent) {
             System.out.println(msg);
         }
         if (msg instanceof HttpRequest) {

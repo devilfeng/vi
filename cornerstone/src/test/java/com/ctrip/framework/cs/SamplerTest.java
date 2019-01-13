@@ -18,15 +18,15 @@ public class SamplerTest {
     public void testHeapHisto() throws IOException, InterruptedException {
         JVMSampler.setMaxWaitingTime(1000);
         List<Object[]> heaphisto = JVMSampler.getCurrentHeapHisto();
-        if(heaphisto==null || heaphisto.isEmpty()) {
+        if (heaphisto == null || heaphisto.isEmpty()) {
             Thread.sleep(500);
             heaphisto = JVMSampler.getCurrentHeapHisto();
         }
         assertTrue(heaphisto.size() > 0);
-        boolean hasSamplerTest=false;
-        for(Object[] instanceInfo:heaphisto){
-            if(instanceInfo[0].toString().contains("SamplerTest")){
-                hasSamplerTest=true;
+        boolean hasSamplerTest = false;
+        for (Object[] instanceInfo : heaphisto) {
+            if (instanceInfo[0].toString().contains("SamplerTest")) {
+                hasSamplerTest = true;
             }
         }
         assertTrue(hasSamplerTest);
@@ -34,8 +34,8 @@ public class SamplerTest {
         assertTrue(heaphisto.size() > 0);
         Thread.sleep(2300);
         heaphisto = JVMSampler.getCurrentHeapHisto();
-        assertEquals(null,heaphisto);
-        if(heaphisto==null || heaphisto.isEmpty()) {
+        assertEquals(null, heaphisto);
+        if (heaphisto == null || heaphisto.isEmpty()) {
             Thread.sleep(500);
             heaphisto = JVMSampler.getCurrentHeapHisto();
         }

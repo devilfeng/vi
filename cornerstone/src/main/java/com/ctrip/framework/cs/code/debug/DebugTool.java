@@ -15,24 +15,25 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 final public class DebugTool {
 
-    static Logger logger = LoggerFactory.getLogger(DebugTool.class);
     public final static String STACKKEY = "#stack";
+    final static Map<String, Map<String, Object>> container;
+    final static Map<String, String> traceIdContainer = new ConcurrentHashMap<>();
+    static Logger logger = LoggerFactory.getLogger(DebugTool.class);
     static String traceIdKey = "traceId";
-    final static Map<String,Map<String,Object>> container;
-    final static Map<String,String> traceIdContainer = new ConcurrentHashMap<>();
+
     static {
         logger.info("init debugTool");
-        container  =new ConcurrentHashMap<>();
+        container = new ConcurrentHashMap<>();
     }
 
-    public static void setThreadTraceId(String traceId){
-        if(traceId != null) {
+    public static void setThreadTraceId(String traceId) {
+        if (traceId != null) {
             traceIdContainer.put(String.valueOf(Thread.currentThread().getId()), traceId);
         }
     }
 
-    public static boolean needMonitor(String traceId){
-        if(traceId == null){
+    public static boolean needMonitor(String traceId) {
+        if (traceId == null) {
             return false;
         }
 
@@ -41,32 +42,32 @@ final public class DebugTool {
     }
 
 
-    public static String getTraceIdKey(){
+    public static String getTraceIdKey() {
         return traceIdKey;
     }
 
-    public static void setTraceIdKey(String newKey){
+    public static void setTraceIdKey(String newKey) {
         traceIdKey = newKey;
     }
 
-    public static void log(String lineId,Map<String,Object> vars){
+    public static void log(String lineId, Map<String, Object> vars) {
 
         try {
             Gson gson = new Gson();
             StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
 
-            for(Map.Entry<String,Object> e:vars.entrySet()){
+            for (Map.Entry<String, Object> e : vars.entrySet()) {
                 try {
 
                     Object val = e.getValue();
-                    if(val != null) {
+                    if (val != null) {
                         MiserJsonTreeWriter jsonTreeWriter = new MiserJsonTreeWriter();
                         gson.toJson(val, val.getClass(), jsonTreeWriter);
                         e.setValue(jsonTreeWriter.get());
                     }
-                }catch (Throwable throwable){
+                } catch (Throwable throwable) {
                     e.setValue(throwable.getMessage());
-                    logger.error("serialize object "+ e.getKey() +" to json failed!",throwable);
+                    logger.error("serialize object " + e.getKey() + " to json failed!", throwable);
 
                 }
             }
@@ -76,56 +77,56 @@ final public class DebugTool {
                 vars.put(STACKKEY, stackTraceElements);
             }
             container.put(lineId, vars);
-        }catch (Throwable e){
-            logger.warn("log debug info failed!",e);
+        } catch (Throwable e) {
+            logger.warn("log debug info failed!", e);
         }
     }
 
-    public static Map<String, Object> removeTraceInfo(String traceId){
+    public static Map<String, Object> removeTraceInfo(String traceId) {
         return container.remove(traceId);
     }
 
-    public static Map<String,Object> viewCurrentTrace(String traceId){
+    public static Map<String, Object> viewCurrentTrace(String traceId) {
         return container.get(traceId);
     }
 
-    public static int getPrivateFieldInt(Object value,String className,String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        Object rtn = getPrivateFieldValue(value,className,fname);
-        if(rtn instanceof Boolean){
-            if((boolean) rtn){
+    public static int getPrivateFieldInt(Object value, String className, String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        Object rtn = getPrivateFieldValue(value, className, fname);
+        if (rtn instanceof Boolean) {
+            if ((boolean) rtn) {
                 return 1;
-            }else{
+            } else {
                 return 0;
             }
 
-        }else {
+        } else {
             return (int) rtn;
         }
     }
 
-    public static double getPrivateFieldDouble(Object value,String className,String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return (double)getPrivateFieldValue(value,className,fname);
+    public static double getPrivateFieldDouble(Object value, String className, String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return (double) getPrivateFieldValue(value, className, fname);
     }
 
-    public static float getPrivateFieldFloat(Object value,String className,String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return (float)getPrivateFieldValue(value,className,fname);
+    public static float getPrivateFieldFloat(Object value, String className, String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return (float) getPrivateFieldValue(value, className, fname);
     }
 
-    public static long getPrivateFieldLong(Object value,String className,String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return (long)getPrivateFieldValue(value,className,fname);
+    public static long getPrivateFieldLong(Object value, String className, String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return (long) getPrivateFieldValue(value, className, fname);
     }
 
-    public static String getPrivateFieldString(Object value,String className,String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        return (String)getPrivateFieldValue(value,className,fname);
+    public static String getPrivateFieldString(Object value, String className, String fname) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+        return (String) getPrivateFieldValue(value, className, fname);
     }
 
 
-    public static Object getPrivateFieldValue(Object value,String className,String fname){
+    public static Object getPrivateFieldValue(Object value, String className, String fname) {
         try {
             Field f = value.getClass().getDeclaredField(fname);
             f.setAccessible(true);
             return f.get(value);
-        }catch (Throwable e){
+        } catch (Throwable e) {
             logger.error(e.getMessage());
             return null;
         }

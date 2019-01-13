@@ -8,8 +8,8 @@ import java.lang.annotation.Target;
 /**
  * Created by jiang.j on 2016/4/12.
  */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.TYPE})
-    public @interface Config {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE})
+public @interface Config {
     String name();
 }

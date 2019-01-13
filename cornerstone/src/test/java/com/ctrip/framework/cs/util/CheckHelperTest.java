@@ -1,7 +1,6 @@
 package com.ctrip.framework.cs.util;
 
 import com.ctrip.framework.cs.IgniteManager;
-import com.ctrip.framework.cs.util.CheckHelper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,11 +15,11 @@ public class CheckHelperTest {
     @Test
     public void testPing() throws IOException {
 
-        IgniteManager.SimpleLogger logger =new IgniteManager.SimpleLogger();
+        IgniteManager.SimpleLogger logger = new IgniteManager.SimpleLogger();
         CheckHelper checkHelper = CheckHelper.create(logger);
         boolean result = checkHelper.telnet("www.ctrip.com", 80);
 
-        assertTrue(logger.getMsgs(0).size()>0);
+        assertTrue(logger.getMsgs(0).size() > 0);
 
     }
 }

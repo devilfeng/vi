@@ -1,7 +1,7 @@
 package com.ctrip.framework.cs.enterprise;
 
-import com.ctrip.framework.cs.util.SecurityUtil;
 import com.ctrip.framework.cs.util.PomUtil;
+import com.ctrip.framework.cs.util.SecurityUtil;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,39 +18,27 @@ import java.net.URL;
  */
 public class DefaultEnMaven implements EnMaven {
 
-    class PomDoc{
-        String g;
-        String a;
-        String v;
-    }
-    class SearchResponse{
-        PomDoc[] docs;
-    }
-    class SearchResult{
-
-        SearchResponse response;
-    }
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    private InputStream getContentByName(String[] av,String fileName){
+    private InputStream getContentByName(String[] av, String fileName) {
 
         InputStream rtn = null;
         String endsWith = ".pom";
-        if(av == null && fileName == null){
+        if (av == null && fileName == null) {
             return null;
-        }else if(av==null) {
+        } else if (av == null) {
             endsWith = "-sources.jar";
             av = PomUtil.getArtifactIdAndVersion(fileName);
         }
 
-        if(av == null){
+        if (av == null) {
             return null;
         }
 
         String searchUrl = "http://search.maven.org/solrsearch/select?q=a:%22";
-        if(av.length>2){
-            searchUrl += av[0] + "%22%20AND%20v:%22" + av[1]+ "%22%20AND%20g:%22" + av[2] + "%22%20AND%20p:%22jar%22&rows=1&wt=json";
-        }else {
+        if (av.length > 2) {
+            searchUrl += av[0] + "%22%20AND%20v:%22" + av[1] + "%22%20AND%20g:%22" + av[2] + "%22%20AND%20p:%22jar%22&rows=1&wt=json";
+        } else {
             searchUrl += av[0] + "%22%20AND%20v:%22" + av[1] + "%22%20AND%20p:%22jar%22&rows=1&wt=json";
         }
         logger.info(searchUrl);
@@ -66,10 +54,10 @@ public class DefaultEnMaven implements EnMaven {
             try (Reader rd = new InputStreamReader(conn.getInputStream(), "UTF-8")) {
                 Gson gson = new Gson();
                 SearchResult results = gson.fromJson(rd, SearchResult.class);
-                if(results.response!=null && results.response.docs !=null && results.response.docs.length >0 ){
+                if (results.response != null && results.response.docs != null && results.response.docs.length > 0) {
 
                     PomDoc pomInfo = results.response.docs[0];
-                    String pomUrl = "https://search.maven.org/remotecontent?filepath="+pomInfo.g.replace('.','/')+"/"+pomInfo.a+"/"+pomInfo.v+"/"+pomInfo.a+"-"+pomInfo.v+endsWith;
+                    String pomUrl = "https://search.maven.org/remotecontent?filepath=" + pomInfo.g.replace('.', '/') + "/" + pomInfo.a + "/" + pomInfo.v + "/" + pomInfo.a + "-" + pomInfo.v + endsWith;
                     //com/jolira/guice/3.0.0/guice-3.0.0.pom
                     logger.info(pomUrl);
                     HttpsURLConnection pomConn = (HttpsURLConnection) new URL(pomUrl).openConnection();
@@ -78,8 +66,8 @@ public class DefaultEnMaven implements EnMaven {
                     rtn = pomConn.getInputStream();
                 }
             }
-        }catch (Exception e){
-            logger.warn("get pominfo by jar name["+av[0] + ' '+av[1]+"] failed",e);
+        } catch (Exception e) {
+            logger.warn("get pominfo by jar name[" + av[0] + ' ' + av[1] + "] failed", e);
         }
         return rtn;
 
@@ -88,11 +76,26 @@ public class DefaultEnMaven implements EnMaven {
     @Override
     public InputStream getPomInfoByFileName(String[] av, String fileName) {
 
-        return getContentByName(av,fileName);
+        return getContentByName(av, fileName);
     }
 
     @Override
     public InputStream getSourceJarByFileName(String fileName) {
-        return getContentByName(null,fileName);
+        return getContentByName(null, fileName);
+    }
+
+    class PomDoc {
+        String g;
+        String a;
+        String v;
+    }
+
+    class SearchResponse {
+        PomDoc[] docs;
+    }
+
+    class SearchResult {
+
+        SearchResponse response;
     }
 }

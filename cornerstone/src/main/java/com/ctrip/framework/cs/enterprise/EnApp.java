@@ -11,17 +11,30 @@ import java.util.Properties;
  */
 public interface EnApp extends Refreshable {
     String getVersion();
+
     String getName();
+
     String getChineseName();
+
     String getOwner();
+
     String getOwnerContact();
+
     String getBackup();
+
     String getBuildTime();
+
     List<ServerInfo> getAllServers();
-    Map<String,String> getHelpLinks();
+
+    Map<String, String> getHelpLinks();
+
     Properties getProperties();
+
     void register();
+
     boolean trace(String traceId);
+
     String getGitCommitId();
+
     String getGitPrjPath();
 }

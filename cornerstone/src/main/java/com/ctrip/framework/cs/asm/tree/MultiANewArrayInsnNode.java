@@ -29,14 +29,14 @@
  */
 package com.ctrip.framework.cs.asm.tree;
 
-import java.util.Map;
-
 import com.ctrip.framework.cs.asm.MethodVisitor;
 import com.ctrip.framework.cs.asm.Opcodes;
 
+import java.util.Map;
+
 /**
  * A node that represents a MULTIANEWARRAY instruction.
- * 
+ *
  * @author Eric Bruneton
  */
 public class MultiANewArrayInsnNode extends AbstractInsnNode {
@@ -53,11 +53,9 @@ public class MultiANewArrayInsnNode extends AbstractInsnNode {
 
     /**
      * Constructs a new {@link MultiANewArrayInsnNode}.
-     * 
-     * @param desc
-     *            an array type descriptor (see {@link com.ctrip.framework.cs.asm.Type}).
-     * @param dims
-     *            number of dimensions of the array to allocate.
+     *
+     * @param desc an array type descriptor (see {@link com.ctrip.framework.cs.asm.Type}).
+     * @param dims number of dimensions of the array to allocate.
      */
     public MultiANewArrayInsnNode(final String desc, final int dims) {
         super(Opcodes.MULTIANEWARRAY);

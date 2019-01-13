@@ -10,8 +10,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class DesUtilTest {
     @Test
-    public void testEncrypt(){
-        String key="somekey09!@%%$";
+    public void testEncrypt() {
+        String key = "somekey09!@%%$";
         String data = "hello world";
         try {
             assertEquals(data, DesUtil.decrypt(DesUtil.encrypt(data, key), key));

@@ -7,12 +7,12 @@ import com.ctrip.framework.cs.ignite.IgnitePlugin;
 /**
  * Created by jiang.j on 2017/9/28.
  */
-@Ignite(id="cornerstone.spring.test",auto = true)
-public class TestIgnitePlugin implements IgnitePlugin{
+@Ignite(id = "cornerstone.spring.test", auto = true)
+public class TestIgnitePlugin implements IgnitePlugin {
     @Override
     public boolean run(IgniteManager.SimpleLogger logger) {
 
-	logger.info("only for test");
+        logger.info("only for test");
         return true;
     }
 }

@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DefaultEnUI implements EnUI {
     private List<Menu> menus = new ArrayList<>();
-    private ConcurrentMap<String,CustomPage> pages = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, CustomPage> pages = new ConcurrentHashMap<>();
 
-    public DefaultEnUI(){
+    public DefaultEnUI() {
         addMenu(new BuildInComponent());
         addMenu(new BuildInMetrics());
-        Menu analyzerMenu = addMenu("Analyzer","fa-coffee");
+        Menu analyzerMenu = addMenu("Analyzer", "fa-coffee");
         addSubMenu(analyzerMenu, new BuildInSelfCheck());
         addSubMenu(analyzerMenu, new BuildInJarDep());
         addSubMenu(analyzerMenu, new BuildInJvmSampler());
@@ -33,29 +33,28 @@ public class DefaultEnUI implements EnUI {
     }
 
 
-    public Menu addMenu(String name,String icon){
-        Menu rtn = new Menu(name,icon);
+    public Menu addMenu(String name, String icon) {
+        Menu rtn = new Menu(name, icon);
         this.menus.add(rtn);
         return rtn;
     }
 
-    public Menu addMenu(CustomPage customPage){
+    public Menu addMenu(CustomPage customPage) {
         Menu rtn = new Menu(customPage);
-        if(!rtn.isBuildIn()){
-            pages.putIfAbsent(customPage.getId(),customPage);
+        if (!rtn.isBuildIn()) {
+            pages.putIfAbsent(customPage.getId(), customPage);
         }
         this.menus.add(rtn);
         return rtn;
     }
 
-    public void addSubMenu(Menu menu, CustomPage customPage){
+    public void addSubMenu(Menu menu, CustomPage customPage) {
         Menu.SubMenu subMenu = new Menu.SubMenu(customPage);
-        if(!subMenu.isBuildIn()){
-            pages.putIfAbsent(customPage.getId(),customPage);
+        if (!subMenu.isBuildIn()) {
+            pages.putIfAbsent(customPage.getId(), customPage);
         }
         menu.addSubMenu(subMenu);
     }
-
 
 
     @Override

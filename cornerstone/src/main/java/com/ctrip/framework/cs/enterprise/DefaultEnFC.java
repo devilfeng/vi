@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,11 +18,11 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class DefaultEnFC implements EnFC {
 
-    ConcurrentMap<String,Boolean> allFeatures = new ConcurrentHashMap<>();
-    ConcurrentMap<String,String> allRemarks = new ConcurrentHashMap<>();
+    ConcurrentMap<String, Boolean> allFeatures = new ConcurrentHashMap<>();
+    ConcurrentMap<String, String> allRemarks = new ConcurrentHashMap<>();
     Logger logger = LoggerFactory.getLogger(getClass());
 
-    public DefaultEnFC(){
+    public DefaultEnFC() {
         Properties properties = new Properties();
 
         try {
@@ -28,19 +30,20 @@ public class DefaultEnFC implements EnFC {
             if (inputStream != null) {
                 properties.load(inputStream);
             }
-            for(String key:properties.stringPropertyNames()){
-               allFeatures.put(key,Boolean.parseBoolean(properties.getProperty(key, "false")));
+            for (String key : properties.stringPropertyNames()) {
+                allFeatures.put(key, Boolean.parseBoolean(properties.getProperty(key, "false")));
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
 
-            logger.warn("read default fc failed!",e);
+            logger.warn("read default fc failed!", e);
         }
     }
+
     @Override
     public boolean isFeatureEnable(String key) {
-        if(allFeatures.containsKey(key)) {
+        if (allFeatures.containsKey(key)) {
             return allFeatures.get(key);
-        }else{
+        } else {
             return false;
         }
     }
@@ -48,8 +51,8 @@ public class DefaultEnFC implements EnFC {
     @Override
     public void setFeatures(Map<String, Boolean> features, String user) {
         String nowDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-        for(Map.Entry<String,Boolean> entry : features.entrySet()){
-            allFeatures.put(entry.getKey(),entry.getValue());
+        for (Map.Entry<String, Boolean> entry : features.entrySet()) {
+            allFeatures.put(entry.getKey(), entry.getValue());
 
             allRemarks.put(entry.getKey(), user + " " + nowDate);
         }

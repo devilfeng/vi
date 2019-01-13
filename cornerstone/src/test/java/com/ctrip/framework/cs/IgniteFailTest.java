@@ -1,7 +1,5 @@
 package com.ctrip.framework.cs;
 
-import com.ctrip.framework.cs.IgniteManager;
-import com.ctrip.framework.cs.IgniteStatus;
 import com.ctrip.framework.cs.configuration.ConfigurationManager;
 import com.ctrip.framework.cs.configuration.InitConfigurationException;
 import com.ctrip.framework.cs.ignite.Status;
@@ -20,7 +18,7 @@ public class IgniteFailTest {
         IgniteManager.ignite();
         IgniteStatus status = IgniteManager.getStatus();
 
-        while (status.getStatus()== Status.Running) {
+        while (status.getStatus() == Status.Running) {
             System.out.println(status.getStatus());
             Thread.sleep(300);
         }

@@ -5,7 +5,7 @@ package com.ctrip.framework.cs.helloworld;
  */
 public class ServiceMetaCache {
 
-    public static void loadMeta(){
+    public static void loadMeta() {
 
     }
 }

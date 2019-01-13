@@ -5,7 +5,7 @@ package com.ctrip.framework.cs.helloworld;
  */
 public class SOASelfCheck {
 
-    public static boolean check(){
+    public static boolean check() {
         return true;
     }
 

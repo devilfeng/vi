@@ -1,8 +1,6 @@
 package com.ctrip.framework.cs.asm;
 
 import com.ctrip.framework.cs.Permission;
-import com.ctrip.framework.cs.asm.ClassReader;
-import com.ctrip.framework.cs.asm.ClassWriter;
 import com.ctrip.framework.cs.asm.util.CheckClassAdapter;
 import com.ctrip.framework.cs.asm.util.TraceClassVisitor;
 import com.ctrip.framework.cs.code.ProfileClassVisitor;
@@ -24,9 +22,8 @@ import java.util.zip.ZipOutputStream;
 public class MethodAdapterTest {
 
 
-
-    public InputStream getClassStream(Class<?> x){
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(x.getName().replace('.','/')+".class");
+    public InputStream getClassStream(Class<?> x) {
+        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(x.getName().replace('.', '/') + ".class");
         return is;
 
     }
@@ -35,34 +32,34 @@ public class MethodAdapterTest {
     public void testInsertCodeToMethod() throws IOException {
         ClassReader cr;
 
-        Path zipPath =Paths.get(System.getProperty("java.io.tmpdir"),"MethodAdapterTest.zip");
+        Path zipPath = Paths.get(System.getProperty("java.io.tmpdir"), "MethodAdapterTest.zip");
         System.out.println(zipPath);
         File zipFile = zipPath.toFile();
         if (zipFile.exists()) {
             Files.delete(zipPath);
         }
-        Class<?>[] testClasses = new Class<?>[]{ProfilerManager.class,FCManager.class, Permission.class, ThreadingManager.class};
+        Class<?>[] testClasses = new Class<?>[]{ProfilerManager.class, FCManager.class, Permission.class, ThreadingManager.class};
 
         try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile))) {
-        for(Class<?> seleClass : testClasses) {
-            try (InputStream input = getClassStream(seleClass)) {
+            for (Class<?> seleClass : testClasses) {
+                try (InputStream input = getClassStream(seleClass)) {
 
-                cr = new ClassReader(input);
-                ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-                TraceClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-                ProfileClassVisitor mr = new ProfileClassVisitor(new CheckClassAdapter(cv), seleClass.getName());
+                    cr = new ClassReader(input);
+                    ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+                    TraceClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+                    ProfileClassVisitor mr = new ProfileClassVisitor(new CheckClassAdapter(cv), seleClass.getName());
 
-                cr.accept(mr, ClassReader.EXPAND_FRAMES);
+                    cr.accept(mr, ClassReader.EXPAND_FRAMES);
 
-                String fileName = seleClass.getSimpleName() + ".class";
+                    String fileName = seleClass.getSimpleName() + ".class";
                     out.putNextEntry(new ZipEntry(fileName));
                     out.write(cw.toByteArray());
                     out.closeEntry();
 
-            } catch (Throwable e) {
-                e.printStackTrace();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
             }
-        }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

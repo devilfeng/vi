@@ -17,55 +17,57 @@ import java.util.regex.Pattern;
  */
 public class LinuxInfoUtil {
 
-    static final String MEMAVAKEY="MemAvailable";
-    static final String MEMFRESSKEY="MemFree";
-    static final String MEMBUFKEY="Buffers";
-    static final String MEMCACHKEY="Cached";
-    public static int getAvailableMemKB(Map<String,String> meminfos) throws IOException {
+    static final String MEMAVAKEY = "MemAvailable";
+    static final String MEMFRESSKEY = "MemFree";
+    static final String MEMBUFKEY = "Buffers";
+    static final String MEMCACHKEY = "Cached";
 
-        if(meminfos==null)
+    public static int getAvailableMemKB(Map<String, String> meminfos) throws IOException {
+
+        if (meminfos == null)
             meminfos = getMemInfo();
         int avaiMem = 0;
         Pattern p = Pattern.compile("\\d+");
 
         Matcher m;
-        if(meminfos.containsKey(MEMAVAKEY)){
+        if (meminfos.containsKey(MEMAVAKEY)) {
             m = p.matcher(meminfos.get(MEMAVAKEY));
-            if(m.find())
+            if (m.find())
                 avaiMem = Integer.parseInt(m.group());
-        }else{
+        } else {
             int free = 0;
             m = p.matcher(meminfos.get(MEMFRESSKEY));
-            if(m.find())
+            if (m.find())
                 free = Integer.parseInt(m.group());
             int buffer = 0;
             m = p.matcher(meminfos.get(MEMBUFKEY));
-            if(m.find())
+            if (m.find())
                 buffer = Integer.parseInt(m.group());
             int cache = 0;
             m = p.matcher(meminfos.get(MEMCACHKEY));
-            if(m.find())
+            if (m.find())
                 cache = Integer.parseInt(m.group());
 
-            avaiMem = free + cache +buffer;
+            avaiMem = free + cache + buffer;
         }
 
         return avaiMem;
     }
+
     public static int getAvailableMemKB() throws IOException {
 
         return getAvailableMemKB(null);
     }
 
-    public static Map<String,String> getMemInfo() throws IOException {
+    public static Map<String, String> getMemInfo() throws IOException {
 
-        Map<String,String> rtn = new HashMap<>();
+        Map<String, String> rtn = new HashMap<>();
         Path meminfoPath = Paths.get("/proc/meminfo");
         if (Files.exists(meminfoPath)) {
             List<String> lines = Files.readAllLines(meminfoPath, Charset.defaultCharset());
-            for(String line :lines){
+            for (String line : lines) {
                 String[] parts = line.split(":");
-                if(parts.length>1) {
+                if (parts.length > 1) {
                     rtn.put(parts[0], parts[1].trim());
                 }
 
@@ -78,7 +80,7 @@ public class LinuxInfoUtil {
 
     public static String getOSInfo() throws IOException {
 
-        String rtn=null;
+        String rtn = null;
         Path fpath = Paths.get("/etc/redhat-release");
 
         if (!Files.exists(fpath)) {
@@ -87,7 +89,7 @@ public class LinuxInfoUtil {
 
         if (Files.exists(fpath)) {
             List<String> lines = Files.readAllLines(fpath, Charset.defaultCharset());
-            if(lines.size()>0) {
+            if (lines.size() > 0) {
                 rtn = lines.get(0);
             }
 
@@ -102,17 +104,18 @@ public class LinuxInfoUtil {
         }
         return null;
     }
-    public static Object[] parseIp(String ip){
-        Object[] rtn= new Object[2];
-        if(ip.length()>20){
-            ip = ip.substring(ip.length()-13);
-        }
-        rtn[0]=Integer.valueOf(ip.substring(6,8),16)+"."+
-                Integer.valueOf(ip.substring(4,6),16)+"."+
-                Integer.valueOf(ip.substring(2,4),16)+"."+
-                Integer.valueOf(ip.substring(0,2),16);
 
-        rtn[1]=Integer.valueOf(ip.substring(9),16);
+    public static Object[] parseIp(String ip) {
+        Object[] rtn = new Object[2];
+        if (ip.length() > 20) {
+            ip = ip.substring(ip.length() - 13);
+        }
+        rtn[0] = Integer.valueOf(ip.substring(6, 8), 16) + "." +
+                Integer.valueOf(ip.substring(4, 6), 16) + "." +
+                Integer.valueOf(ip.substring(2, 4), 16) + "." +
+                Integer.valueOf(ip.substring(0, 2), 16);
+
+        rtn[1] = Integer.valueOf(ip.substring(9), 16);
         return rtn;
     }
 

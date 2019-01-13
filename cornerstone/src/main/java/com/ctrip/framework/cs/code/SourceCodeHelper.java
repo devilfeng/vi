@@ -1,12 +1,12 @@
 package com.ctrip.framework.cs.code;
 
+import com.ctrip.framework.cs.asm.ClassReader;
 import com.ctrip.framework.cs.asm.util.TraceClassVisitor;
 import com.ctrip.framework.cs.configuration.ConfigurationManager;
 import com.ctrip.framework.cs.configuration.InitConfigurationException;
+import com.ctrip.framework.cs.enterprise.EnFactory;
 import com.ctrip.framework.cs.util.IOUtils;
 import com.ctrip.framework.cs.util.Tools;
-import com.ctrip.framework.cs.asm.ClassReader;
-import com.ctrip.framework.cs.enterprise.EnFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -23,26 +23,21 @@ import java.util.zip.ZipInputStream;
  */
 public final class SourceCodeHelper {
 
-    public static class SourceCode{
-        public int size;
-        public String file_name;
-        public String content;
-    }
-    public static SourceCode getJarSourceCode(String jarName,String path) throws IOException {
+    public static SourceCode getJarSourceCode(String jarName, String path) throws IOException {
 
-        SourceCode rtn= new SourceCode();
+        SourceCode rtn = new SourceCode();
         String name = Tools.getNoExtensionName(jarName);
         Path target = Paths.get(System.getProperty("java.io.tmpdir"),
                 name + "-sources.jar");
-        if(!Files.exists(target)) {
-            try(InputStream stream = EnFactory.getEnMaven().getSourceJarByFileName(name)) {
-                if(stream != null) {
+        if (!Files.exists(target)) {
+            try (InputStream stream = EnFactory.getEnMaven().getSourceJarByFileName(name)) {
+                if (stream != null) {
                     Files.copy(stream, target);
                 }
             }
         }
         File jarFile = target.toFile();
-        if(jarFile.exists()) {
+        if (jarFile.exists()) {
             try (ZipFile zipFile = new ZipFile(jarFile)) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
@@ -54,10 +49,10 @@ public final class SourceCodeHelper {
                     }
                 }
             }
-        }else{
+        } else {
 
-            if(path.endsWith(".java")){
-                path = path.substring(0,path.length()-5).replace('.','/')+".class";
+            if (path.endsWith(".java")) {
+                path = path.substring(0, path.length() - 5).replace('.', '/') + ".class";
             }
             URL realUrl = new URL(getJarLocationByPath(path));
             try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
@@ -81,23 +76,23 @@ public final class SourceCodeHelper {
         ClassReader cr = new ClassReader(is);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         TraceClassVisitor cv = new TraceClassVisitor(new PrintWriter(outputStream));
-        cr.accept(cv,ClassReader.EXPAND_FRAMES);
+        cr.accept(cv, ClassReader.EXPAND_FRAMES);
         return outputStream.toString("UTF-8");
     }
 
     public static String getJarLocationByPath(URL url) throws IOException {
 
         String rtn = "";
-        if(url == null){
+        if (url == null) {
             return rtn;
-        }else {
+        } else {
             String urlStr = url.toString();
-            if(urlStr.charAt(urlStr.length()-1)=='/'){
-                urlStr = urlStr.substring(0,urlStr.length()-2);
+            if (urlStr.charAt(urlStr.length() - 1) == '/') {
+                urlStr = urlStr.substring(0, urlStr.length() - 2);
             }
             int last = urlStr.lastIndexOf('!');
 
-            return  urlStr.substring(urlStr.indexOf('f'),last>0?last:urlStr.lastIndexOf('/'));
+            return urlStr.substring(urlStr.indexOf('f'), last > 0 ? last : urlStr.lastIndexOf('/'));
         }
     }
 
@@ -106,33 +101,39 @@ public final class SourceCodeHelper {
         String rtn = "";
         URL url = Thread.currentThread().getContextClassLoader().getResource(path);
 
-        if(url == null){
+        if (url == null) {
             return rtn;
-        }else {
+        } else {
             return getJarLocationByPath(url);
         }
 
     }
 
-    public static String getCodePath(String namespace,String name) throws IOException, InitConfigurationException {
+    public static String getCodePath(String namespace, String name) throws IOException, InitConfigurationException {
 
         String rtn = "";
-        URL url = Thread.currentThread().getContextClassLoader().getResource(namespace.replace('.', '/')+"/"+name+".class");
+        URL url = Thread.currentThread().getContextClassLoader().getResource(namespace.replace('.', '/') + "/" + name + ".class");
 
-        if(url == null){
+        if (url == null) {
             return rtn;
         }
 
         if ("jar".equals(url.getProtocol())) {
             String urlStr = url.toString();
             String location = urlStr.substring(urlStr.indexOf('f'), urlStr.lastIndexOf('!'));
-            rtn = "jar|"+new File(location).getName()+"|"+namespace.replace('.','|');
-        }else {
+            rtn = "jar|" + new File(location).getName() + "|" + namespace.replace('.', '|');
+        } else {
 
-            rtn = "git|"+ ConfigurationManager.getConfigInstance().getString("app.source.folder");
+            rtn = "git|" + ConfigurationManager.getConfigInstance().getString("app.source.folder");
         }
 
         return rtn;
 
+    }
+
+    public static class SourceCode {
+        public int size;
+        public String file_name;
+        public String content;
     }
 }

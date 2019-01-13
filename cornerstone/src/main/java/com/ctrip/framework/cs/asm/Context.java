@@ -32,7 +32,7 @@ package com.ctrip.framework.cs.asm;
 
 /**
  * Information about a class being parsed in a {@link ClassReader}.
- * 
+ *
  * @author Eric Bruneton
  */
 class Context {

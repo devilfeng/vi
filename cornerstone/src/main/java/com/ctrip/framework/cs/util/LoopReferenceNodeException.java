@@ -9,12 +9,13 @@ import java.util.Arrays;
 public class LoopReferenceNodeException extends Exception {
 
     String[] _ids;
-    public LoopReferenceNodeException(String[] ids){
+
+    public LoopReferenceNodeException(String[] ids) {
         super("loop reference be found in [" + TextUtils.join(",", Arrays.asList(ids)) + "]");
         _ids = ids;
     }
 
-    public String[] ids(){
+    public String[] ids() {
         return _ids;
     }
 }

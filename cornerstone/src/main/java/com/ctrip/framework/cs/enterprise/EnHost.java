@@ -6,6 +6,8 @@ package com.ctrip.framework.cs.enterprise;
 public interface EnHost {
 
     String getHostName();
+
     String getHostAddress();
+
     String getDataCenter();
 }

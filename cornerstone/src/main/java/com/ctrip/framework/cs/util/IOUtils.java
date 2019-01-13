@@ -49,7 +49,7 @@ public class IOUtils {
      * This method buffers the input internally, so there is no need to use a
      * <code>BufferedInputStream</code>.
      *
-     * @param input the <code>InputStream</code> to read from, not null
+     * @param input    the <code>InputStream</code> to read from, not null
      * @param encoding the encoding to use, null means platform default
      * @return the list of Strings, never null
      * @throws NullPointerException if the input is null
@@ -57,7 +57,7 @@ public class IOUtils {
      * @since 2.3
      */
     public static List<String> readLines(final InputStream input, final Charset encoding) throws IOException {
-        try(final InputStreamReader reader = new InputStreamReader(input,encoding)) {
+        try (final InputStreamReader reader = new InputStreamReader(input, encoding)) {
             return readLines(reader);
         }
     }
@@ -72,7 +72,7 @@ public class IOUtils {
      * This method buffers the input internally, so there is no need to use a
      * <code>BufferedInputStream</code>.
      *
-     * @param input the <code>InputStream</code> to read from, not null
+     * @param input    the <code>InputStream</code> to read from, not null
      * @param encoding the encoding to use, null means platform default
      * @return the list of Strings, never null
      * @throws NullPointerException                         if the input is null
@@ -89,6 +89,7 @@ public class IOUtils {
     public static BufferedReader toBufferedReader(final Reader reader) {
         return reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
     }
+
     /**
      * Gets the contents of a <code>Reader</code> as a list of Strings,
      * one entry per line.
@@ -103,7 +104,7 @@ public class IOUtils {
      * @since 1.1
      */
     public static List<String> readLines(final Reader input) throws IOException {
-        try(final BufferedReader reader = toBufferedReader(input)) {
+        try (final BufferedReader reader = toBufferedReader(input)) {
             final List<String> list = new ArrayList<>();
             String line = reader.readLine();
             while (line != null) {
@@ -114,30 +115,31 @@ public class IOUtils {
         }
     }
 
-    public static String readAll(final InputStream input) throws IOException{
+    public static String readAll(final InputStream input) throws IOException {
         String defaultCharset = System.getProperty("sun.jnu.encoding");
-        Charset fileCharset  = defaultCharset!=null?Charset.forName(defaultCharset):Charset.defaultCharset();
-        Scanner s = new Scanner(input,fileCharset.name()).useDelimiter("\\A");
-        return s.hasNext()?s.next():"";
+        Charset fileCharset = defaultCharset != null ? Charset.forName(defaultCharset) : Charset.defaultCharset();
+        Scanner s = new Scanner(input, fileCharset.name()).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 
-    public static byte[] partitionRead(final Path path,int partionSize,int partitionIndex) throws IOException {
+    public static byte[] partitionRead(final Path path, int partionSize, int partitionIndex) throws IOException {
 
         try (SeekableByteChannel sbc = Files.newByteChannel(path);
              InputStream in = Channels.newInputStream(sbc)) {
-            long startIndex = (partitionIndex-1)*partionSize;
+            long startIndex = (partitionIndex - 1) * partionSize;
             if (startIndex < 0) {
                 startIndex = 0;
             }
             in.skip(startIndex);
-            if (partionSize >  MAX_BUFFER_SIZE)
+            if (partionSize > MAX_BUFFER_SIZE)
                 throw new OutOfMemoryError("Required array size too large");
 
-            return read(in,  partionSize);
+            return read(in, partionSize);
 
         }
     }
-    public static byte[] reverseRead(final Path path,Charset charset,long size) throws IOException {
+
+    public static byte[] reverseRead(final Path path, Charset charset, long size) throws IOException {
         try (SeekableByteChannel sbc = Files.newByteChannel(path);
              InputStream in = Channels.newInputStream(sbc)) {
             long startIndex = sbc.size() - size;
@@ -152,24 +154,24 @@ public class IOUtils {
 
         }
     }
+
     private static byte[] read(InputStream source, int initialSize) throws IOException {
         int capacity = initialSize;
         byte[] buf = new byte[capacity];
         int nread = 0;
-        nread = source.read(buf, nread, capacity - nread) ;
+        nread = source.read(buf, nread, capacity - nread);
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
     }
 
 
     public static InputStream decompressStream(InputStream input) throws IOException {
-        PushbackInputStream pb = new PushbackInputStream( input, 2 ); //we need a pushbackstream to look ahead
-        byte [] signature = new byte[2];
-        int len = pb.read( signature ); //read the signature
-        pb.unread( signature, 0, len ); //push back the signature to the stream
-        if( signature[ 0 ] == (byte) 0x1f && signature[ 1 ] == (byte) 0x8b ) { //check if matches standard gzip magic number
+        PushbackInputStream pb = new PushbackInputStream(input, 2); //we need a pushbackstream to look ahead
+        byte[] signature = new byte[2];
+        int len = pb.read(signature); //read the signature
+        pb.unread(signature, 0, len); //push back the signature to the stream
+        if (signature[0] == (byte) 0x1f && signature[1] == (byte) 0x8b) { //check if matches standard gzip magic number
             return new GZIPInputStream(pb);
-        }
-        else {
+        } else {
             return pb;
         }
     }

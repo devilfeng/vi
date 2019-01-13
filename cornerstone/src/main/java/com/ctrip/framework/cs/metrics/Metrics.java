@@ -5,7 +5,9 @@ package com.ctrip.framework.cs.metrics;
  */
 public final class Metrics {
 
-    public static final class VIAPI implements MetricDefine{
+    public static final String VIAPI = "vi.api##" + MetricsValueType.MicroSec.getValue();
+
+    public static final class VIAPI implements MetricDefine {
 
         @Override
         public String valueDescription() {
@@ -22,11 +24,10 @@ public final class Metrics {
             return Tags.class;
         }
 
-        public enum Tags{
-            Size,Path
+        public enum Tags {
+            Size, Path
         }
 
 
     }
-    public static final String VIAPI="vi.api##"+MetricsValueType.MicroSec.getValue();
 }

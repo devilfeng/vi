@@ -1,8 +1,5 @@
 package com.ctrip.framework.cs.configuration;
 
-import com.ctrip.framework.cs.configuration.Configuration;
-import com.ctrip.framework.cs.configuration.ConfigurationManager;
-import com.ctrip.framework.cs.configuration.InitConfigurationException;
 import com.ctrip.framework.cs.util.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,47 +13,48 @@ import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by jiang.j on 2016/4/7.
  */
 public class ConfigurationManagerTest {
 
-    public ConfigurationManagerTest(){
+    public ConfigurationManagerTest() {
         ConfigurationManager.setEnableDefaultload(false);
 
     }
 
     @Test
-    public void testNoConfig(){
+    public void testNoConfig() {
         try {
             ConfigurationManager.setEnableDefaultload(true);
             ConfigurationManager.setConfigPath("config1/");
             Configuration config = ConfigurationManager.getConfigInstance();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Assert.fail();
-        }finally {
+        } finally {
             ConfigurationManager.setEnableDefaultload(false);
         }
     }
 
     @Test
-    public void testGetDefaultAppPro(){
+    public void testGetDefaultAppPro() {
 
         ConfigurationManager.setEnableDefaultload(true);
 
         System.out.println(ConfigurationManager.class.getProtectionDomain().getCodeSource().getLocation().toString());
         URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
         try {
-            InputStream in = ConfigurationManager.class.getClassLoader().getResourceAsStream("jar:"+url.toURI().toString()+"!/META-INF/MANIFEST.MF");
+            InputStream in = ConfigurationManager.class.getClassLoader().getResourceAsStream("jar:" + url.toURI().toString() + "!/META-INF/MANIFEST.MF");
             System.out.println(url.toURI().toString());
             System.out.println(in);
             ZipInputStream zip = new ZipInputStream(url.openStream());
             ZipEntry ze;
-            while ((ze = zip.getNextEntry())!=null){
+            while ((ze = zip.getNextEntry()) != null) {
 
-                if(ze.getName().equals("META-INF/MANIFEST.MF")){
+                if (ze.getName().equals("META-INF/MANIFEST.MF")) {
                     System.out.println(ze.getName());
                     break;
                 }
@@ -77,21 +75,21 @@ public class ConfigurationManagerTest {
         ConfigurationManager.loadPropertiesFromResources("test.properties");
         assertEquals("9", ConfigurationManager.getConfigInstance().getProperty("com.ctrip.config.samples.needCount"));
         assertEquals("9", ConfigurationManager.getConfigInstance().getString("com.ctrip.config.samples.needCount"));
-        assertEquals("100", ConfigurationManager.getConfigInstance().getString("no.exist","100"));
+        assertEquals("100", ConfigurationManager.getConfigInstance().getString("no.exist", "100"));
     }
 
     @Test
     public void testNumberProperties() throws Exception {
         Configuration config = ConfigurationManager.getConfigInstance();
         double val = 12.3;
-        config.setProperty("test-double",val);
+        config.setProperty("test-double", val);
         assertTrue(val == config.getDouble("test-double"));
-        config.setProperty("test-int",10);
+        config.setProperty("test-int", 10);
         assertTrue(10 == config.getDouble("test-int"));
         assertTrue(0 == config.getDouble("test-int-emp"));
-        assertTrue(20 == config.getInt("test-int-emp",20));
-        assertTrue(new Integer(23) == config.getInt("test-int-emp",new Integer(23)));
-        assertEquals(false,config.getBoolean("test-boolean"));
+        assertTrue(20 == config.getInt("test-int-emp", 20));
+        assertTrue(new Integer(23) == config.getInt("test-int-emp", new Integer(23)));
+        assertEquals(false, config.getBoolean("test-boolean"));
     }
 
     @Test
@@ -112,13 +110,13 @@ public class ConfigurationManagerTest {
     public void testInstallReadOnly() throws InitConfigurationException {
 
         Properties pros = new Properties();
-        pros.setProperty("hello","world");
+        pros.setProperty("hello", "world");
         ConfigurationManager.installReadonlyProperties(pros);
 
-        assertEquals("world",ConfigurationManager.getConfigInstance().getString("#.hello"));
-        ConfigurationManager.setProperties(new HashMap<String, String>(){{
+        assertEquals("world", ConfigurationManager.getConfigInstance().getString("#.hello"));
+        ConfigurationManager.setProperties(new HashMap<String, String>() {{
             put("#.hello", "abc");
-        }},"root");
+        }}, "root");
         assertEquals("world", ConfigurationManager.getConfigInstance().getString("#.hello"));
     }
 }

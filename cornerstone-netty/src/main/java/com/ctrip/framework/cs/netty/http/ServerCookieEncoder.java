@@ -5,6 +5,7 @@ import java.util.*;
 
 import static com.ctrip.framework.cs.netty.http.CookieUtil.*;
 import static com.ctrip.framework.cs.util.Preconditions.checkNotNull;
+
 /**
  * Created by jiang.j on 2017/2/14.
  */
@@ -31,7 +32,7 @@ public final class ServerCookieEncoder extends CookieEncoder {
     /**
      * Encodes the specified cookie name-value pair into a Set-Cookie header value.
      *
-     * @param name the cookie name
+     * @param name  the cookie name
      * @param value the cookie value
      * @return a single Set-Cookie header value
      */
@@ -88,9 +89,10 @@ public final class ServerCookieEncoder extends CookieEncoder {
         return stripTrailingSeparator(buf);
     }
 
-    /** Deduplicate a list of encoded cookies by keeping only the last instance with a given name.
+    /**
+     * Deduplicate a list of encoded cookies by keeping only the last instance with a given name.
      *
-     * @param encoded The list of encoded cookies.
+     * @param encoded         The list of encoded cookies.
      * @param nameToLastIndex A map from cookie name to index of last cookie instance.
      * @return The encoded list with all but the last instance of a named cookie.
      */

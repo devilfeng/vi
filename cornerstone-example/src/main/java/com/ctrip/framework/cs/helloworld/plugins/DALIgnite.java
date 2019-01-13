@@ -10,8 +10,8 @@ import com.ctrip.framework.cs.ignite.IgnitePlugin;
 /**
  * Created by jiang.j on 2016/8/22.
  */
-@Ignite(id = "dal.ignite",before = "redis.ignite")
-public class DALIgnite implements IgnitePlugin{
+@Ignite(id = "dal.ignite", before = "redis.ignite")
+public class DALIgnite implements IgnitePlugin {
     @Override
     public boolean run(IgniteManager.SimpleLogger logger) {
         logger.info("some help page: http://**.yourcorp.com/help");
@@ -25,14 +25,14 @@ public class DALIgnite implements IgnitePlugin{
         logger.info("Begin load metadata to cache");
         ServiceMetaCache.loadMeta();
         logger.info("End load metadata to cache");
-        try{
+        try {
             logger.info("Begin Self-check");
-            if(!SOASelfCheck.check()){
+            if (!SOASelfCheck.check()) {
                 logger.error("Self-check failed! SOA initialize failed!");
                 return false;
             }
             logger.info("Self-check success!");
-        }finally {
+        } finally {
             logger.info("End Self-check");
         }
 

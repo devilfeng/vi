@@ -10,9 +10,10 @@ import com.ctrip.framework.cs.util.Predicate;
  */
 @Config(name = "test")
 public class TestConfigBean {
-@FieldValidation(validator = TestKeyValidator.class,errorMsg = "")
-private static String TestKey="chinese";
-    public static String getTestKey(){
+    @FieldValidation(validator = TestKeyValidator.class, errorMsg = "")
+    private static String TestKey = "chinese";
+
+    public static String getTestKey() {
         return TestKey;
     }
 

@@ -1,13 +1,14 @@
 package com.ctrip.framework.cs.code.debug;
 
-import com.ctrip.framework.cs.code.StackFrame;
 import com.ctrip.framework.cs.NotFoundException;
 import com.ctrip.framework.cs.code.Debugger;
+import com.ctrip.framework.cs.code.StackFrame;
 import com.ctrip.framework.cs.instrument.AgentTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -15,6 +16,7 @@ import java.util.*;
  */
 public class DefaultDebugger implements Debugger {
     Logger logger = LoggerFactory.getLogger(getClass());
+
     @Override
     public boolean startup() {
         return true;
@@ -22,25 +24,26 @@ public class DefaultDebugger implements Debugger {
 
     @Override
     public boolean registerBreakpoint(String source, int line, String breakpointId) {
-        return registerBreakpoint(source,line,breakpointId,null,null);
+        return registerBreakpoint(source, line, breakpointId, null, null);
     }
 
     @Override
     public boolean registerBreakpoint(String source, int line, String breakpointId, String condition) {
         return false;
     }
-    public boolean registerBreakpoint(String source, int line, String breakpointId,Condition[] conditions,String owner) {
+
+    public boolean registerBreakpoint(String source, int line, String breakpointId, Condition[] conditions, String owner) {
         try {
             String className = source;
-            if(source.endsWith(".java")){
-                className = source.substring(0,source.length()-5);
+            if (source.endsWith(".java")) {
+                className = source.substring(0, source.length() - 5);
             }
-            AgentTool.addDebugClass(className, new DebugInfo(line,breakpointId,Condition.checkAndCorrect(conditions),owner));
+            AgentTool.addDebugClass(className, new DebugInfo(line, breakpointId, Condition.checkAndCorrect(conditions), owner));
 
             return true;
-        }catch (Throwable e){
+        } catch (Throwable e) {
 
-            logger.error("register breakpoint failed! source:"+source+", line:"+line,e);
+            logger.error("register breakpoint failed! source:" + source + ", line:" + line, e);
             return false;
         }
     }
@@ -53,18 +56,18 @@ public class DefaultDebugger implements Debugger {
 
     @Override
     public StackFrame getCapturedFrame(String breakpointId) throws NotFoundException {
-        final Map<String,Object> traceInfos = AgentTool.removeDebugClassByTraceId(breakpointId,false);
-        if(traceInfos == null){
+        final Map<String, Object> traceInfos = AgentTool.removeDebugClassByTraceId(breakpointId, false);
+        if (traceInfos == null) {
             return null;
         }
         StackFrame stackFrame = new StackFrame() {
             @Override
             public Map<String, Object> getLocals() {
-                Map<String,Object> rtn = new HashMap<>();
-                for(Map.Entry<String,Object> entry:traceInfos.entrySet()){
+                Map<String, Object> rtn = new HashMap<>();
+                for (Map.Entry<String, Object> entry : traceInfos.entrySet()) {
                     String key = entry.getKey();
-                    if(key.startsWith("var.")){
-                        rtn.put(key.substring(4),entry.getValue());
+                    if (key.startsWith("var.")) {
+                        rtn.put(key.substring(4), entry.getValue());
                     }
                 }
                 return rtn;
@@ -72,11 +75,11 @@ public class DefaultDebugger implements Debugger {
 
             @Override
             public Map<String, Object> getFields() {
-                Map<String,Object> rtn = new HashMap<>();
-                for(Map.Entry<String,Object> entry:traceInfos.entrySet()){
+                Map<String, Object> rtn = new HashMap<>();
+                for (Map.Entry<String, Object> entry : traceInfos.entrySet()) {
                     String key = entry.getKey();
-                    if(key.startsWith("field.")){
-                        rtn.put(key.substring(4),entry.getValue());
+                    if (key.startsWith("field.")) {
+                        rtn.put(key.substring(4), entry.getValue());
                     }
                 }
                 return rtn;
@@ -84,11 +87,11 @@ public class DefaultDebugger implements Debugger {
 
             @Override
             public Map<String, Object> getStaticFields() {
-                Map<String,Object> rtn = new HashMap<>();
-                for(Map.Entry<String,Object> entry:traceInfos.entrySet()){
+                Map<String, Object> rtn = new HashMap<>();
+                for (Map.Entry<String, Object> entry : traceInfos.entrySet()) {
                     String key = entry.getKey();
-                    if(key.startsWith("static_field.")){
-                        rtn.put(key.substring(4),entry.getValue());
+                    if (key.startsWith("static_field.")) {
+                        rtn.put(key.substring(4), entry.getValue());
                     }
                 }
                 return rtn;
@@ -105,6 +108,6 @@ public class DefaultDebugger implements Debugger {
 
     @Override
     public void stopTrace(String breakpointId) throws NotFoundException {
-        AgentTool.removeDebugClassByTraceId(breakpointId,true);
+        AgentTool.removeDebugClassByTraceId(breakpointId, true);
     }
 }

@@ -10,5 +10,6 @@ import java.util.List;
  */
 public interface EnUI {
     public List<Menu> getMenus();
+
     public CustomPage getPageById(String id);
 }

@@ -1,5 +1,6 @@
 package com.ctrip.framework.cs.instrument;
 
+import com.ctrip.framework.cs.NotFoundException;
 import com.ctrip.framework.cs.asm.ClassReader;
 import com.ctrip.framework.cs.asm.ClassWriter;
 import com.ctrip.framework.cs.asm.util.CheckClassAdapter;
@@ -8,7 +9,6 @@ import com.ctrip.framework.cs.code.SourceCodeHelper;
 import com.ctrip.framework.cs.code.debug.*;
 import com.ctrip.framework.cs.metrics.MetricsCollector;
 import com.ctrip.framework.cs.util.Tools;
-import com.ctrip.framework.cs.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,39 +31,38 @@ import java.util.zip.ZipInputStream;
  * Created by jiang.j on 2017/4/27.
  */
 public class AgentTool {
-    static Class<?> vmProviderClass=null;
-    static Logger logger = LoggerFactory.getLogger(AgentTool.class);
-    private static Map<String,byte[]> needMetricsClasses = new ConcurrentHashMap<>();
-    private static Map<String,byte[]> needDebugClasses = new ConcurrentHashMap<>();
-    private static Map<String,byte[]> needRecoverClasses = new ConcurrentHashMap<>();
-    private static Map<String,byte[]> modifiedClasses = new ConcurrentHashMap<>();
-    private static Map<String,DebugInfo> debugClassInfos = new HashMap<>();
-
-
-    private static Boolean isLoaded = false;
     private static final int MAXCLASSCOUNT = 10;
+    static Class<?> vmProviderClass = null;
+    static Logger logger = LoggerFactory.getLogger(AgentTool.class);
+    private static Map<String, byte[]> needMetricsClasses = new ConcurrentHashMap<>();
+    private static Map<String, byte[]> needDebugClasses = new ConcurrentHashMap<>();
+    private static Map<String, byte[]> needRecoverClasses = new ConcurrentHashMap<>();
+    private static Map<String, byte[]> modifiedClasses = new ConcurrentHashMap<>();
+    private static Map<String, DebugInfo> debugClassInfos = new HashMap<>();
+    private static Boolean isLoaded = false;
 
-    public static Map<String,byte[]> getModifiedClasses(){
+    public static Map<String, byte[]> getModifiedClasses() {
         return modifiedClasses;
     }
 
-    public static boolean agentIsLoaded(){
+    public static boolean agentIsLoaded() {
         return isLoaded;
     }
 
-    public static synchronized  void startUp(){
-        if(!isLoaded){
+    public static synchronized void startUp() {
+        if (!isLoaded) {
             try {
                 loadAgent();
                 Instrumentation inst = instrumentation();
                 inst.addTransformer(new CodeTransformer(), true);
                 isLoaded = true;
-            }catch (Throwable e){
-                logger.warn("start agentTool failed",e);
+            } catch (Throwable e) {
+                logger.warn("start agentTool failed", e);
             }
         }
     }
-    private static void loadAgent() throws Exception{
+
+    private static void loadAgent() throws Exception {
 
         final String virtualMachineClassName = "com.sun.tools.attach.VirtualMachine";
         final String hotspotVMName = "sun.tools.attach.HotSpotVirtualMachine";
@@ -104,10 +103,10 @@ public class AgentTool {
     private static void validateTransform(Class seleClass) throws IllegalOperationException {
 
         String className = seleClass.getName();
-        if((className.startsWith("com.ctrip.framework.cs.instrument.")) ||(className.startsWith("com.ctrip.framework.cs.metrics."))
-                ||(className.startsWith("com.ctrip.framework.cs.code.")) ||(className.startsWith("com.ctrip.framework.cs.asm.")) ){
+        if ((className.startsWith("com.ctrip.framework.cs.instrument.")) || (className.startsWith("com.ctrip.framework.cs.metrics."))
+                || (className.startsWith("com.ctrip.framework.cs.code.")) || (className.startsWith("com.ctrip.framework.cs.asm."))) {
             throw new IllegalOperationException("Cannot modify this class,because it be used in code transform!");
-        }else if(seleClass.getClassLoader() == null){
+        } else if (seleClass.getClassLoader() == null) {
             throw new IllegalOperationException("Cannot modify system class!");
         }
     }
@@ -126,15 +125,15 @@ public class AgentTool {
 
         validateTransform(seleClass);
 
-        if(needDebugClasses.containsKey(className)){
+        if (needDebugClasses.containsKey(className)) {
             throw new IllegalOperationException("Cannot monitor this class, because it already be monitored by debugger!");
         }
 
-        if(needMetricsClasses.size()>= MAXCLASSCOUNT){
-            throw new IllegalOperationException("Has reached the maximum limit "+MAXCLASSCOUNT+", you cannot add!");
+        if (needMetricsClasses.size() >= MAXCLASSCOUNT) {
+            throw new IllegalOperationException("Has reached the maximum limit " + MAXCLASSCOUNT + ", you cannot add!");
         }
 
-        if(!needMetricsClasses.containsKey(className)) {
+        if (!needMetricsClasses.containsKey(className)) {
             if (needMetricsClasses.put(className, new byte[]{}) == null) {
                 reloadClass(seleClass);
             }
@@ -142,25 +141,25 @@ public class AgentTool {
 
     }
 
-    public synchronized static void addDebugClass(String className,DebugInfo debugInfo) throws Exception {
+    public synchronized static void addDebugClass(String className, DebugInfo debugInfo) throws Exception {
         Class seleClass = Class.forName(className.replace('/', '.'));
 
         validateTransform(seleClass);
 
-        if(needMetricsClasses.containsKey(className)){
+        if (needMetricsClasses.containsKey(className)) {
             throw new IllegalOperationException("Cannot monitor this class, because it already be monitored by metrics!");
         }
 
-        if(needDebugClasses.size()>= MAXCLASSCOUNT){
-            throw new IllegalOperationException("Has reached the maximum limit "+MAXCLASSCOUNT+", you cannot add!");
+        if (needDebugClasses.size() >= MAXCLASSCOUNT) {
+            throw new IllegalOperationException("Has reached the maximum limit " + MAXCLASSCOUNT + ", you cannot add!");
         }
 
-        if(needDebugClasses.containsKey(className)){
+        if (needDebugClasses.containsKey(className)) {
             throw new IllegalOperationException("Cannot debug this class, because it already be debugged by others!");
         }
 
         debugClassInfos.put(className, debugInfo);
-        if(needDebugClasses.put(className,new byte[]{}) == null) {
+        if (needDebugClasses.put(className, new byte[]{}) == null) {
             reloadClass(seleClass);
         }
 
@@ -173,57 +172,57 @@ public class AgentTool {
         Instrumentation inst = instrumentation();
         Class[] classes = inst.getAllLoadedClasses();
 
-        for(Class c:classes){
+        for (Class c : classes) {
             rtn.add(c.getName());
         }
         return rtn;
     }
 
-    public static byte[] transformClass(byte[] classfileBuffer,String className) {
+    public static byte[] transformClass(byte[] classfileBuffer, String className) {
 
 
-        if(needMetricsClasses.containsKey(className)) {
+        if (needMetricsClasses.containsKey(className)) {
             ClassReader cr = new ClassReader(classfileBuffer);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             ProfileClassVisitor mr = new ProfileClassVisitor(new CheckClassAdapter(cw), className);
-            cr.accept(mr, ClassReader.SKIP_DEBUG|ClassReader.SKIP_FRAMES);
+            cr.accept(mr, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
             needMetricsClasses.put(className, classfileBuffer);
             byte[] rtn = cw.toByteArray();
-            modifiedClasses.put(className,rtn);
+            modifiedClasses.put(className, rtn);
             return rtn;
-        }else if(needDebugClasses.containsKey(className)){
+        } else if (needDebugClasses.containsKey(className)) {
             ClassReader cr = new ClassReader(classfileBuffer);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             //TraceClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
             ClassMetadata metadata = new ClassMetadata();
-            cr.accept(new MetadataCollector(metadata),ClassReader.SKIP_FRAMES);
-            DebugClassVisitor mr = new DebugClassVisitor(new CheckClassAdapter(cw), className,debugClassInfos.get(className),metadata);
+            cr.accept(new MetadataCollector(metadata), ClassReader.SKIP_FRAMES);
+            DebugClassVisitor mr = new DebugClassVisitor(new CheckClassAdapter(cw), className, debugClassInfos.get(className), metadata);
             cr.accept(mr, ClassReader.SKIP_FRAMES);
             needDebugClasses.put(className, classfileBuffer);
             byte[] rtn = cw.toByteArray();
             modifiedClasses.put(className, rtn);
             return rtn;
 
-        }else if(needRecoverClasses.containsKey(className)){
+        } else if (needRecoverClasses.containsKey(className)) {
             byte[] classBuffer = needRecoverClasses.remove(className);
-            return classBuffer==null?classfileBuffer:classBuffer;
+            return classBuffer == null ? classfileBuffer : classBuffer;
 
-        }else{
+        } else {
             return classfileBuffer;
         }
     }
 
     public static ClassMetadata getClassMetadata(String className) throws IOException {
 
-        String path = className.replace('.','/') + ".class";
+        String path = className.replace('.', '/') + ".class";
         URL url = Thread.currentThread().getContextClassLoader().getResource(path);
 
         ClassReader cr = null;
-        if(url != null && "file".equals(url.getProtocol())){
-            try(InputStream in = (InputStream) url.getContent()) {
+        if (url != null && "file".equals(url.getProtocol())) {
+            try (InputStream in = (InputStream) url.getContent()) {
                 cr = new ClassReader(in);
             }
-        }else {
+        } else {
             URL realUrl = new URL(SourceCodeHelper.getJarLocationByPath(url));
             try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
                 ZipEntry entry;
@@ -237,11 +236,11 @@ public class AgentTool {
             }
         }
 
-        if(cr != null) {
+        if (cr != null) {
             ClassMetadata metadata = new ClassMetadata();
             cr.accept(new MetadataCollector(metadata), ClassReader.SKIP_FRAMES);
             return metadata;
-        }else {
+        } else {
             return null;
         }
     }
@@ -251,7 +250,7 @@ public class AgentTool {
         List<LocalVariable> rtn = null;
 
         ClassMetadata metadata = getClassMetadata(className);
-        if(metadata!=null) {
+        if (metadata != null) {
             rtn = metadata.getVariablesByLineNum(null, lineNum);
         }
 
@@ -262,7 +261,7 @@ public class AgentTool {
         List<ClassField> rtn = null;
 
         ClassMetadata metadata = getClassMetadata(className);
-        if(metadata!=null) {
+        if (metadata != null) {
             rtn = metadata.getFields();
         }
 
@@ -270,12 +269,12 @@ public class AgentTool {
 
     }
 
-    public static String[] getNeedMetricsClasses(){
+    public static String[] getNeedMetricsClasses() {
         Set<String> strings = needMetricsClasses.keySet();
         return strings.toArray(new String[strings.size()]);
     }
 
-    public static String[] getNeedDebugClasses(){
+    public static String[] getNeedDebugClasses() {
         Set<String> strings = needDebugClasses.keySet();
         return strings.toArray(new String[strings.size()]);
     }
@@ -284,11 +283,11 @@ public class AgentTool {
 
         String rtn = "";
         byte[] bytes = needMetricsClasses.get(className);
-        if(bytes == null){
+        if (bytes == null) {
             bytes = needDebugClasses.get(className);
         }
-        if(bytes != null){
-           rtn = SourceCodeHelper.decompileClass(new ByteArrayInputStream(bytes));
+        if (bytes != null) {
+            rtn = SourceCodeHelper.decompileClass(new ByteArrayInputStream(bytes));
         }
         return rtn;
     }
@@ -296,14 +295,14 @@ public class AgentTool {
     public static String getModifiedClassASMCode(String className) throws IOException {
         String rtn = "";
         byte[] bytes = modifiedClasses.get(className);
-        if(bytes!=null){
+        if (bytes != null) {
             rtn = SourceCodeHelper.decompileClass(new ByteArrayInputStream(bytes));
         }
 
         return rtn;
     }
 
-    public static DebugInfo getDebugInfoByClassName(String className){
+    public static DebugInfo getDebugInfoByClassName(String className) {
         return debugClassInfos.get(className);
     }
 
@@ -316,9 +315,9 @@ public class AgentTool {
         MetricsCollector.getCollector().removeClassMetrics(name);
     }
 
-    public synchronized static Map<String, Object> removeDebugClassByTraceId(String traceId,boolean isForce) throws NotFoundException {
+    public synchronized static Map<String, Object> removeDebugClassByTraceId(String traceId, boolean isForce) throws NotFoundException {
         String className = null;
-        logger.debug("ready remove "+traceId);
+        logger.debug("ready remove " + traceId);
         Map<String, Object> rtn = DebugTool.removeTraceInfo(traceId);
 
         for (Map.Entry<String, DebugInfo> entry : debugClassInfos.entrySet()) {
@@ -328,10 +327,10 @@ public class AgentTool {
             }
         }
         if (className == null) {
-            throw  new NotFoundException("no debug class found by traceid "+traceId);
+            throw new NotFoundException("no debug class found by traceid " + traceId);
         }
 
-        if(rtn != null || isForce) {
+        if (rtn != null || isForce) {
             try {
 
                 Class seleClass = Class.forName(className.replace('/', '.'));

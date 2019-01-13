@@ -3,53 +3,59 @@ package com.ctrip.framework.cs.configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
+
 /**
  * Created by jiang.j on 2016/4/7.
  */
 public class ConfigurationUtils {
-     private static final Logger logger = LoggerFactory.getLogger(ConfigurationUtils.class);
-
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationUtils.class);
 
 
     /**
      * Utility method to obtain <code>Properties</code> given an instance of <code>Configuration</code>.
      * Returns an empty <code>Properties</code> object if the config has no properties or is null.
+     *
      * @param config Configuration to get the properties
      * @return properties extracted from the configuration
      */
     public static Properties getProperties(Configuration config) {
- 	   Properties p = new Properties();
- 	   if (config != null){
-	 	   Iterator<String> it = config.getKeys();
-	 	   while (it.hasNext()){
-	 		   String key = it.next();
-	 		   if (key != null) {
-	 		      Object value = config.getProperty(key);
-                  if (value != null) {
-                      p.put(key, value);
-                  }	 		   }
-	 	   }
- 	   }
-  	   return p;
+        Properties p = new Properties();
+        if (config != null) {
+            Iterator<String> it = config.getKeys();
+            while (it.hasNext()) {
+                String key = it.next();
+                if (key != null) {
+                    Object value = config.getProperty(key);
+                    if (value != null) {
+                        p.put(key, value);
+                    }
+                }
+            }
+        }
+        return p;
     }
 
     public static void loadProperties(Properties props, Configuration config) {
-        for (Entry<Object, Object> entry: props.entrySet()) {
+        for (Entry<Object, Object> entry : props.entrySet()) {
             String key = (String) entry.getKey();
             config.setProperty(key, entry.getValue());
         }
 
     }
-    public static Set<String> loadProperties(String prefix,Properties props, Configuration config) {
+
+    public static Set<String> loadProperties(String prefix, Properties props, Configuration config) {
         Set<String> keys = new LinkedHashSet<>();
-        for (Entry<Object, Object> entry: props.entrySet()) {
+        for (Entry<Object, Object> entry : props.entrySet()) {
             String key = (String) entry.getKey();
-            if(!key.startsWith(prefix+".")){
-                key = prefix+"."+key;
+            if (!key.startsWith(prefix + ".")) {
+                key = prefix + "." + key;
             }
             config.setProperty(key, entry.getValue());
 
@@ -65,7 +71,7 @@ public class ConfigurationUtils {
             return;
         }
         String[] filesToLoad = nextLoad.split(",");
-        for (String fileName: filesToLoad) {
+        for (String fileName : filesToLoad) {
             fileName = fileName.trim();
             try {
                 URL url = new URL(baseUrl + "/" + fileName);
@@ -136,7 +142,7 @@ public class ConfigurationUtils {
 
     private static String getNextLoad(Configuration propConfig, String... nextLoadPropertyKeys) {
         String nextLoadKeyToUse = null;
-        for (String key: nextLoadPropertyKeys) {
+        for (String key : nextLoadPropertyKeys) {
             if (propConfig.getProperty(key) != null) {
                 nextLoadKeyToUse = key;
                 break;
@@ -155,7 +161,7 @@ public class ConfigurationUtils {
         // In case this is a list of files to load, always treat the value as a list
         List<Object> list = config.getList(nextLoadKeyToUse);
         StringBuilder sb = new StringBuilder();
-        for (Object value: list) {
+        for (Object value : list) {
             sb.append(value).append(",");
         }
         String nextLoad = sb.toString();
@@ -165,20 +171,21 @@ public class ConfigurationUtils {
 
     /**
      * Load properties from InputStream with utf-8 encoding, and it will take care of closing the input stream.
+     *
      * @param fin
      * @return
      * @throws IOException
      */
     public static Properties loadPropertiesFromInputStream(InputStream fin) throws IOException {
         Properties props = new Properties();
-        if(fin == null){
+        if (fin == null) {
             return props;
         }
-        try(InputStreamReader reader = new InputStreamReader(fin, "UTF-8")) {
+        try (InputStreamReader reader = new InputStreamReader(fin, "UTF-8")) {
             props.load(reader);
             return props;
         } finally {
-                fin.close();
+            fin.close();
         }
     }
 }

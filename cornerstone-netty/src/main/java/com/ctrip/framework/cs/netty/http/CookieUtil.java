@@ -12,6 +12,10 @@ public class CookieUtil {
 
     private static final BitSet VALID_COOKIE_ATTRIBUTE_VALUE_OCTETS = validCookieAttributeValueOctets();
 
+    private CookieUtil() {
+        // Unused
+    }
+
     // token = 1*<any CHAR except CTLs or separators>
     // separators = "(" | ")" | "<" | ">" | "@"
     // | "," | ";" | ":" | "\" | <">
@@ -23,7 +27,7 @@ public class CookieUtil {
             bits.set(i);
         }
         int[] separators = new int[]
-                { '(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '=', '{', '}', ' ', '\t' };
+                {'(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '=', '{', '}', ' ', '\t'};
         for (int separator : separators) {
             bits.set(separator, false);
         }
@@ -59,7 +63,6 @@ public class CookieUtil {
         bits.set(';', false);
         return bits;
     }
-
 
     /**
      * @param buf a buffer where some cookies were maybe encoded
@@ -156,9 +159,5 @@ public class CookieUtil {
             throw new IllegalArgumentException(name + " contains the prohibited characters: " + value.charAt(i));
         }
         return value;
-    }
-
-    private CookieUtil() {
-        // Unused
     }
 }

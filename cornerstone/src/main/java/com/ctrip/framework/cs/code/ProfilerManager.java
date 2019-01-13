@@ -6,13 +6,13 @@ package com.ctrip.framework.cs.code;
  */
 public class ProfilerManager {
 
-    public void start(){
+    public void start() {
         long l = System.nanoTime();
-        if(l==1000)
-        System.out.print(l);
+        if (l == 1000)
+            System.out.print(l);
     }
 
-    public void testA(){
+    public void testA() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {

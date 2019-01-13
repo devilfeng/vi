@@ -7,11 +7,12 @@ public enum MetricsValueType {
     Sec(0), MillSec(1), MicroSec(2), NaoSec(3);
 
     int value;
-     MetricsValueType(int i) {
+
+    MetricsValueType(int i) {
         this.value = i;
     }
 
-    public int getValue(){
+    public int getValue() {
         return this.value;
     }
 }

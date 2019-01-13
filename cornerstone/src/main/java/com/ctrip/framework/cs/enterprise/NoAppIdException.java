@@ -5,7 +5,7 @@ package com.ctrip.framework.cs.enterprise;
  */
 public class NoAppIdException extends Exception {
 
-    public NoAppIdException(){
+    public NoAppIdException() {
         super("can't get appId, make sure appId is configured correctly in your app");
     }
 }

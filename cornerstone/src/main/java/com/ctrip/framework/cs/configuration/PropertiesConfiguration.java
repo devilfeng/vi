@@ -17,57 +17,59 @@ import java.util.concurrent.ConcurrentMap;
 public class PropertiesConfiguration implements Configuration {
 
     Logger logger = LoggerFactory.getLogger(getClass());
-    ConcurrentMap<String,Object> properties = new ConcurrentHashMap<>();
+    ConcurrentMap<String, Object> properties = new ConcurrentHashMap<>();
     File propsFile = null;
-    public PropertiesConfiguration(){
+
+    public PropertiesConfiguration() {
 
     }
 
-    public PropertiesConfiguration(File file){
-        if(file.isFile()) {
+    public PropertiesConfiguration(File file) {
+        if (file.isFile()) {
             try (InputStream inputStream = new FileInputStream(file)) {
                 propsFile = file;
                 Properties pros = new Properties();
                 pros.load(inputStream);
                 loadProperties(pros);
             } catch (Throwable e) {
-                logger.error("read configuraiont from file:"+file.getPath()+" failed",e);
+                logger.error("read configuraiont from file:" + file.getPath() + " failed", e);
             }
         }
 
     }
 
 
-    public PropertiesConfiguration(URL url){
+    public PropertiesConfiguration(URL url) {
 
         try (InputStream inputStream = url.openStream()) {
             Properties pros = new Properties();
             pros.load(inputStream);
             loadProperties(pros);
         } catch (Throwable e) {
-            logger.error("read configuraiont from url:"+url.getPath()+" failed",e);
+            logger.error("read configuraiont from url:" + url.getPath() + " failed", e);
         }
 
     }
 
-    public final void loadProperties(Properties properties){
+    public final void loadProperties(Properties properties) {
 
-        for(Map.Entry<Object,Object> entry:properties.entrySet()){
-            properties.put(String.valueOf(entry.getKey()),entry.getValue());
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            properties.put(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 
-    public void clearPropertyDirect(String key){
+    public void clearPropertyDirect(String key) {
         properties.remove(key);
     }
-    public void save(){
-        if(this.propsFile != null){
-           Properties props = new Properties();
+
+    public void save() {
+        if (this.propsFile != null) {
+            Properties props = new Properties();
             props.putAll(this.properties);
             try {
-                props.store(new FileOutputStream(this.propsFile),"");
+                props.store(new FileOutputStream(this.propsFile), "");
             } catch (IOException e) {
-                logger.error("write configuration to file failed!",e);
+                logger.error("write configuration to file failed!", e);
             }
 
         }
@@ -91,9 +93,9 @@ public class PropertiesConfiguration implements Configuration {
 
     @Override
     public void setProperty(String key, Object value) {
-        if(value !=null) {
+        if (value != null) {
             properties.put(key, value);
-        }else{
+        } else {
             properties.remove(key);
         }
     }
@@ -116,8 +118,8 @@ public class PropertiesConfiguration implements Configuration {
     @Override
     public Iterator<String> getKeys(String prefix) {
         Set<String> keys = new HashSet<>();
-        for(String key:properties.keySet()){
-            if(key.startsWith(prefix)) {
+        for (String key : properties.keySet()) {
+            if (key.startsWith(prefix)) {
                 keys.add(key);
             }
         }
@@ -136,72 +138,73 @@ public class PropertiesConfiguration implements Configuration {
 
     @Override
     public boolean getBoolean(String key) {
-        return  Boolean.parseBoolean(String.valueOf(properties.get(key)));
+        return Boolean.parseBoolean(String.valueOf(properties.get(key)));
     }
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getBoolean(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
 
     @Override
-    public Boolean getBoolean(String key, Boolean defaultValue){
-        return getBoolean(key,defaultValue.booleanValue());
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        return getBoolean(key, defaultValue.booleanValue());
     }
+
     @Override
     public byte getByte(String key) {
-        return  containsKey(key)?Byte.parseByte(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Byte.parseByte(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public byte getByte(String key, byte defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getByte(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public Byte getByte(String key, Byte defaultValue) {
-        return getByte(key,defaultValue.byteValue());
+        return getByte(key, defaultValue.byteValue());
     }
 
     @Override
     public double getDouble(String key) {
-        return  containsKey(key)?Double.parseDouble(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Double.parseDouble(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public double getDouble(String key, double defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getDouble(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public Double getDouble(String key, Double defaultValue) {
-        return getDouble(key,defaultValue.doubleValue());
+        return getDouble(key, defaultValue.doubleValue());
     }
 
     @Override
     public float getFloat(String key) {
-        return  containsKey(key)?Float.parseFloat(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Float.parseFloat(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public float getFloat(String key, float defaultValue) {
 
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getFloat(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
@@ -209,9 +212,9 @@ public class PropertiesConfiguration implements Configuration {
     @Override
     public Float getFloat(String key, Float defaultValue) {
 
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getFloat(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
@@ -219,84 +222,84 @@ public class PropertiesConfiguration implements Configuration {
     @Override
     public int getInt(String key) {
 
-        return  containsKey(key)?Integer.parseInt(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Integer.parseInt(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public int getInt(String key, int defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getInt(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public Integer getInteger(String key, Integer defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getInt(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public long getLong(String key) {
-        return  containsKey(key)?Long.parseLong(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Long.parseLong(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public long getLong(String key, long defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getLong(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public Long getLong(String key, Long defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getLong(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public short getShort(String key) {
-        return  containsKey(key)?Short.parseShort(String.valueOf(properties.get(key))):0;
+        return containsKey(key) ? Short.parseShort(String.valueOf(properties.get(key))) : 0;
     }
 
     @Override
     public short getShort(String key, short defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getShort(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public Short getShort(String key, Short defaultValue) {
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getShort(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
 
     @Override
     public BigDecimal getBigDecimal(String key) {
-        return  containsKey(key)?new BigDecimal(String.valueOf(this.properties.get(key)).replace(",","")):null;
+        return containsKey(key) ? new BigDecimal(String.valueOf(this.properties.get(key)).replace(",", "")) : null;
     }
 
     @Override
     public BigDecimal getBigDecimal(String key, BigDecimal defaultValue) {
 
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getBigDecimal(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
@@ -305,15 +308,15 @@ public class PropertiesConfiguration implements Configuration {
     public BigInteger getBigInteger(String key) {
 
         String raw = String.valueOf(this.properties.get(key));
-        return containsKey(key)?new BigInteger(raw.replace(",","")):null;
+        return containsKey(key) ? new BigInteger(raw.replace(",", "")) : null;
     }
 
     @Override
     public BigInteger getBigInteger(String key, BigInteger defaultValue) {
 
-        if(containsKey(key)){
+        if (containsKey(key)) {
             return getBigInteger(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }
@@ -321,47 +324,47 @@ public class PropertiesConfiguration implements Configuration {
     @Override
     public String getString(String key) {
 
-        char[] startChar = new char[]{'$','{'};
+        char[] startChar = new char[]{'$', '{'};
         char endDelimiter = '}';
         int judegStartIndex = 0;
         final int maxLen = 50;
-        String raw =  (String)properties.get(key);
+        String raw = (String) properties.get(key);
 
-        if(raw == null)
+        if (raw == null)
             return null;
 
         StringBuilder sb = new StringBuilder(raw.length());
         StringBuilder tmp = new StringBuilder();
 
-        for(char c:raw.toCharArray()){
+        for (char c : raw.toCharArray()) {
 
             int tmpLen = tmp.length();
 
-            boolean isStartEnd = judegStartIndex>=startChar.length;
+            boolean isStartEnd = judegStartIndex >= startChar.length;
 
-            if((!isStartEnd && c==startChar[judegStartIndex]) ||
-                    (isStartEnd && tmpLen>0 && tmpLen<maxLen)){
+            if ((!isStartEnd && c == startChar[judegStartIndex]) ||
+                    (isStartEnd && tmpLen > 0 && tmpLen < maxLen)) {
                 judegStartIndex++;
-                if(isStartEnd && c==endDelimiter){
+                if (isStartEnd && c == endDelimiter) {
                     String tmpKey = tmp.substring(startChar.length);
                     String keyVal = System.getProperty(tmpKey);
-                    if(keyVal != null){
-                       sb.append(keyVal);
-                    }else if (this.properties.containsKey(tmpKey)) {
+                    if (keyVal != null) {
+                        sb.append(keyVal);
+                    } else if (this.properties.containsKey(tmpKey)) {
                         sb.append(this.properties.get(tmpKey));
-                    }else if(System.getenv(tmpKey)!=null){
+                    } else if (System.getenv(tmpKey) != null) {
                         sb.append(this.properties.get(tmpKey));
                     }
 
-                    tmp.delete(0,tmp.length());
+                    tmp.delete(0, tmp.length());
                     judegStartIndex = 0;
-                }else {
+                } else {
                     tmp.append(c);
                 }
-            }else{
+            } else {
                 sb.append(tmp.toString());
-                tmp.delete(0,tmp.length());
-                judegStartIndex =0;
+                tmp.delete(0, tmp.length());
+                judegStartIndex = 0;
                 sb.append(c);
             }
 
@@ -371,9 +374,9 @@ public class PropertiesConfiguration implements Configuration {
 
     @Override
     public String getString(String key, String defaultValue) {
-        if(properties.containsKey(key)){
+        if (properties.containsKey(key)) {
             return getString(key);
-        }else {
+        } else {
             return defaultValue;
         }
     }

@@ -9,11 +9,12 @@ import java.lang.instrument.UnmodifiableClassException;
  */
 public class AgentMain {
     private static Instrumentation inst;
-      public static void agentmain(String agentArgs, Instrumentation instrumentation)
+
+    public static void agentmain(String agentArgs, Instrumentation instrumentation)
             throws ClassNotFoundException, UnmodifiableClassException,
             InterruptedException {
-          inst = instrumentation;
-          inst.addTransformer(new CodeTransformer(), true);
+        inst = instrumentation;
+        inst.addTransformer(new CodeTransformer(), true);
 
     }
 

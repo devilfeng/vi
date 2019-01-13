@@ -23,7 +23,7 @@ public class VIServletContextListener implements ServletContextListener {
 
         logger.info("Begin Init VI");
         final ServletContext context = sce.getServletContext();
-        System.setProperty(SysKeys.ServerInfo,context.getServerInfo());
+        System.setProperty(SysKeys.ServerInfo, context.getServerInfo());
 
         context.addListener(new ServletRequestListener() {
             @Override
@@ -37,13 +37,13 @@ public class VIServletContextListener implements ServletContextListener {
                 EnFactory.getEnApp().trace(httpServletRequest.getHeader(DebugTool.getTraceIdKey()));
             }
         });
-        System.setProperty(SysKeys.TOMCATCONTEXTPATH,context.getContextPath());
+        System.setProperty(SysKeys.TOMCATCONTEXTPATH, context.getContextPath());
 
         try {
             Class.forName("javax.servlet.ServletRegistration");
             ServletRegister.regiesterVIServlet(context, logger);
-        }catch (ClassNotFoundException e){
-            logger.warn("servlet version below 3.0",e);
+        } catch (ClassNotFoundException e) {
+            logger.warn("servlet version below 3.0", e);
         }
 
         logger.info("End Init VI");

@@ -1,8 +1,8 @@
 package com.ctrip.framework.cs.enterprise;
 
 import com.ctrip.framework.cs.SysKeys;
-import com.ctrip.framework.cs.code.DebuggerManager;
 import com.ctrip.framework.cs.code.Debugger;
+import com.ctrip.framework.cs.code.DebuggerManager;
 import com.ctrip.framework.cs.configuration.ConfigurationManager;
 import com.ctrip.framework.cs.configuration.InitConfigurationException;
 import com.ctrip.framework.cs.util.HttpUtil;
@@ -24,11 +24,12 @@ import java.util.*;
 public class DefaultEnApp implements EnApp {
     Logger logger = LoggerFactory.getLogger(getClass());
     Properties properties = new Properties();
-    public DefaultEnApp(){
 
-        try(InputStream is =Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/app.properties")) {
-            if(is!=null) {
-                try(InputStreamReader reader =new InputStreamReader(is, Charset.defaultCharset())) {
+    public DefaultEnApp() {
+
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("META-INF/app.properties")) {
+            if (is != null) {
+                try (InputStreamReader reader = new InputStreamReader(is, Charset.defaultCharset())) {
                     properties.load(reader);
                 }
             }
@@ -37,15 +38,33 @@ public class DefaultEnApp implements EnApp {
         }
     }
 
+    public static List<ServerInfo> getAppServers(String etcdUrl, String appId) throws Exception {
 
-    class EtcdResult{
-        EtcdNode node;
-    }
-    class EtcdNode{
-        String key;
-        String value;
-        boolean dir;
-        EtcdNode[] nodes;
+        List<ServerInfo> rtn = new ArrayList<>();
+
+
+        URL url = new URL(etcdUrl + appId + "?recursive=true");
+        EtcdResult result = HttpUtil.doGet(url, EtcdResult.class);
+        for (EtcdNode idc : result.node.nodes) {
+            if (idc.dir && idc.nodes != null) {
+                for (EtcdNode server : idc.nodes) {
+                    if (!server.dir) {
+                        ServerInfo serverInfo = new ServerInfo();
+
+                        String[] keyInfos = idc.key.split("/");
+                        serverInfo.setIdc(keyInfos[3]);
+                        serverInfo.setName(server.key.substring(idc.key.length() + 1));
+                        String[] tmp = server.value.split(":");
+                        serverInfo.setIp(tmp[0]);
+                        serverInfo.setUrl(tmp.length > 1 && !tmp[1].equalsIgnoreCase("null") ?
+                                (tmp[1].startsWith("null/") ? "8080" + tmp[1].substring(4) : tmp[1]) : "8080");
+                        rtn.add(serverInfo);
+                    }
+                }
+
+            }
+        }
+        return rtn;
     }
 
     @Override
@@ -83,42 +102,14 @@ public class DefaultEnApp implements EnApp {
         return properties.getProperty("app.buildTime");
     }
 
-    public static List<ServerInfo> getAppServers(String etcdUrl,String appId) throws Exception {
-
-        List<ServerInfo> rtn = new ArrayList<>();
-
-
-        URL url = new URL(etcdUrl+ appId + "?recursive=true");
-        EtcdResult result = HttpUtil.doGet(url, EtcdResult.class);
-        for(EtcdNode idc:result.node.nodes){
-            if(idc.dir && idc.nodes != null){
-                for(EtcdNode server:idc.nodes){
-                    if(!server.dir) {
-                        ServerInfo serverInfo = new ServerInfo();
-
-                        String[] keyInfos = idc.key.split("/");
-                        serverInfo.setIdc(keyInfos[3]);
-                        serverInfo.setName(server.key.substring(idc.key.length() + 1));
-                        String[] tmp = server.value.split(":");
-                        serverInfo.setIp(tmp[0]);
-                        serverInfo.setUrl(tmp.length>1 && !tmp[1].equalsIgnoreCase("null")?
-                                (tmp[1].startsWith("null/")?"8080"+tmp[1].substring(4):tmp[1]):"8080");
-                        rtn.add(serverInfo);
-                    }
-                }
-
-            }
-        }
-        return rtn;
-    }
     @Override
     public List<ServerInfo> getAllServers() {
-         List<ServerInfo> rtn = new ArrayList<>();
+        List<ServerInfo> rtn = new ArrayList<>();
 
         try {
-            rtn =getAppServers(ConfigurationManager.getConfigInstance().getString(SysKeys.ETCDKEY),EnFactory.getEnBase().getAppId());
-        }catch (Throwable e){
-            logger.warn("get all servers info failed!",e);
+            rtn = getAppServers(ConfigurationManager.getConfigInstance().getString(SysKeys.ETCDKEY), EnFactory.getEnBase().getAppId());
+        } catch (Throwable e) {
+            logger.warn("get all servers info failed!", e);
         }
         return rtn;
     }
@@ -140,10 +131,10 @@ public class DefaultEnApp implements EnApp {
         try {
             addresses = ServerConnector.getRegistryAddresses();
         } catch (InitConfigurationException e) {
-            logger.error("init config failed!",e);
+            logger.error("init config failed!", e);
             return;
         }
-        for(String address:addresses) {
+        for (String address : addresses) {
             try {
                 URL url = new URL(address);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -157,8 +148,8 @@ public class DefaultEnApp implements EnApp {
                 try (InputStream inputStream = (conn.getInputStream())) {
                     logger.debug(IOUtils.readAll(inputStream));
                 }
-            }catch (Throwable e){
-                logger.warn("self registration failed! address:"+address,e);
+            } catch (Throwable e) {
+                logger.warn("self registration failed! address:" + address, e);
             }
         }
     }
@@ -167,7 +158,7 @@ public class DefaultEnApp implements EnApp {
     public boolean trace(String traceId) {
 
         Debugger debugger = DebuggerManager.getCurrent();
-        if(debugger != null) {
+        if (debugger != null) {
             try {
                 return debugger.triggerBreakpoint(traceId);
             } catch (Throwable e) {
@@ -190,5 +181,16 @@ public class DefaultEnApp implements EnApp {
     @Override
     public void refresh() {
 
+    }
+
+    class EtcdResult {
+        EtcdNode node;
+    }
+
+    class EtcdNode {
+        String key;
+        String value;
+        boolean dir;
+        EtcdNode[] nodes;
     }
 }

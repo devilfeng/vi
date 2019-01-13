@@ -16,7 +16,7 @@ import java.security.SecureRandom;
 public class DesUtil {
 
 
-  private final static String DES = "DES";
+    private final static String DES = "DES";
 
     public static String encrypt(String data, String key) throws Exception {
         byte[] bt = encrypt(data.getBytes(), key.getBytes());
@@ -30,7 +30,7 @@ public class DesUtil {
             return null;
         BASE64Decoder decoder = new BASE64Decoder();
         byte[] buf = decoder.decodeBuffer(data);
-        byte[] bt = decrypt(buf,key.getBytes());
+        byte[] bt = decrypt(buf, key.getBytes());
         return new String(bt);
     }
 
@@ -63,4 +63,5 @@ public class DesUtil {
         cipher.init(Cipher.DECRYPT_MODE, securekey, sr);
 
         return cipher.doFinal(data);
-    }}
+    }
+}

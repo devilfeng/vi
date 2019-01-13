@@ -5,5 +5,6 @@ package com.ctrip.framework.cs.enterprise;
  */
 public interface EnBase {
     String getAppId();
+
     String getEnvType();
 }

@@ -20,59 +20,50 @@ import java.util.zip.ZipInputStream;
 /**
  * Created by jiang.j on 2016/9/26.
  */
-@ComponentStatus(id="vi.allconfigfiles",name="all config files",description = "查看所有配置文件",singleton = true,custom = true)
+@ComponentStatus(id = "vi.allconfigfiles", name = "all config files", description = "查看所有配置文件", singleton = true, custom = true)
 public class AllConfigFiles {
 
 
-    public static class ConfigFile{
-        public String suffix;
-        public String name;
-        public long lastModified;
-        public long size;
-        public String path;
+    static final String[] suffixes = new String[]{"xml", "properties", "yaml", "json", "config"};
+    private static List<ConfigFile> externalFiles = Collections.synchronizedList(new ArrayList<ConfigFile>());
+    private transient Logger logger = LoggerFactory.getLogger(getClass());
+    private List<ConfigFile> allFiles;
+    public AllConfigFiles() {
 
+        allFiles = externalFiles;
+        try {
+            URL rootUrl = Thread.currentThread().getContextClassLoader().getResource("/");
+            if (rootUrl != null) {
+                Path rootFolderPath = Paths.get(rootUrl.toURI());
+                allFiles.addAll(getAllConfigFiles(rootFolderPath, suffixes));
+            }
+            allFiles.addAll(getAllJarConfigs(suffixes));
+        } catch (Throwable e) {
+            logger.warn("get app root path failed!", e);
+        }
     }
 
-    private static List<ConfigFile> externalFiles = Collections.synchronizedList(new ArrayList<ConfigFile>());
-    public static  boolean addConfigFile(File f){
-        if(f!= null && f.exists()){
+    public static boolean addConfigFile(File f) {
+        if (f != null && f.exists()) {
 
             boolean canAdd = false;
-            for(String suf:suffixes){
-                if(f.getName().toLowerCase().endsWith(suf)) {
+            for (String suf : suffixes) {
+                if (f.getName().toLowerCase().endsWith(suf)) {
                     canAdd = true;
                 }
             }
-            if(canAdd) {
+            if (canAdd) {
                 ConfigFile configFile = new ConfigFile();
                 configFile.path = String.valueOf(ConfigUrlContainer.addUrl(f.getAbsolutePath()));
                 configFile.name = f.getAbsolutePath();
                 configFile.size = f.length();
                 configFile.lastModified = f.lastModified();
-                externalFiles.add(0,configFile);
+                externalFiles.add(0, configFile);
                 return true;
             }
         }
 
         return false;
-    }
-
-    private transient Logger logger = LoggerFactory.getLogger(getClass());
-    private List<ConfigFile> allFiles;
-    static final String[] suffixes = new String[]{"xml", "properties", "yaml", "json","config"};
-    public AllConfigFiles(){
-
-        allFiles = externalFiles;
-        try {
-            URL rootUrl = Thread.currentThread().getContextClassLoader().getResource("/");
-            if(rootUrl != null) {
-                Path rootFolderPath = Paths.get(rootUrl.toURI());
-                allFiles.addAll(getAllConfigFiles(rootFolderPath, suffixes));
-            }
-            allFiles.addAll(getAllJarConfigs(suffixes));
-        }catch (Throwable e){
-            logger.warn("get app root path failed!",e);
-        }
     }
 
     private List<ConfigFile> getAllJarConfigs(final String[] suffixes) throws IOException {
@@ -86,7 +77,7 @@ public class AllConfigFiles {
             if (url != null && "jar".equals(url.getProtocol())) {
                 String urlStr = url.toString();
                 String location = urlStr.substring(urlStr.indexOf('f'), urlStr.lastIndexOf('!'));
-                String jarName = location.substring(location.lastIndexOf('/')+1, location.length());
+                String jarName = location.substring(location.lastIndexOf('/') + 1, location.length());
 
                 URL realUrl = new URL(location);
                 try (ZipInputStream zip = new ZipInputStream(realUrl.openStream())) {
@@ -102,13 +93,13 @@ public class AllConfigFiles {
                         }*/
 
                         for (String suf : suffixes) {
-                           if(zeNameLowerCase.endsWith("." + suf)) {
-                              canAdd = true;
-                               break;
-                           }
+                            if (zeNameLowerCase.endsWith("." + suf)) {
+                                canAdd = true;
+                                break;
+                            }
                         }
 
-                        if(canAdd) {
+                        if (canAdd) {
 
                             ConfigFile configFile = new ConfigFile();
                             configFile.lastModified = ze.getTime();
@@ -129,7 +120,7 @@ public class AllConfigFiles {
         return configs;
     }
 
-    private List<ConfigFile> getAllConfigFiles(Path folderPath, final String[] suffixes){
+    private List<ConfigFile> getAllConfigFiles(Path folderPath, final String[] suffixes) {
 
         final List<ConfigFile> rtn = new ArrayList<>();
         final int prefixLen = folderPath.toString().length();
@@ -139,7 +130,7 @@ public class AllConfigFiles {
                 public FileVisitResult visitFile(final Path path, BasicFileAttributes attrs) throws IOException {
                     for (String suf : suffixes) {
                         String fullPath = path.toString();
-                        if (fullPath.toLowerCase().endsWith("."+suf)) {
+                        if (fullPath.toLowerCase().endsWith("." + suf)) {
                             ConfigFile cfile = new ConfigFile();
                             cfile.lastModified = attrs.lastModifiedTime().toMillis();
                             cfile.size = attrs.size();
@@ -160,5 +151,14 @@ public class AllConfigFiles {
         }
 
         return rtn;
+    }
+
+    public static class ConfigFile {
+        public String suffix;
+        public String name;
+        public long lastModified;
+        public long size;
+        public String path;
+
     }
 }

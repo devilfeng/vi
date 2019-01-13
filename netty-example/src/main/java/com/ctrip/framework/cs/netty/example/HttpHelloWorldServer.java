@@ -16,12 +16,12 @@ import io.netty.handler.logging.LoggingHandler;
 public final class HttpHelloWorldServer {
 
     static final boolean SSL = System.getProperty("ssl") != null;
-    static final int PORT = Integer.parseInt(System.getProperty("port", SSL? "8443" : "8088"));
+    static final int PORT = Integer.parseInt(System.getProperty("port", SSL ? "8443" : "8088"));
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
         //final SslContext sslCtx;
-        ConfigurationManager.getConfigInstance().setProperty("app.localLog.path","E:\\Tools\\apache-tomcat-7.0.68\\logs");
+        ConfigurationManager.getConfigInstance().setProperty("app.localLog.path", "E:\\Tools\\apache-tomcat-7.0.68\\logs");
 
         // Configure the server.
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -30,17 +30,16 @@ public final class HttpHelloWorldServer {
             ServerBootstrap b = new ServerBootstrap();
             b.option(ChannelOption.SO_BACKLOG, 1024);
             b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new HttpHelloWorldServerInitializer());
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new HttpHelloWorldServerInitializer());
 
 
             Channel ch = b.bind(PORT).sync().channel();
 
 
-
             System.err.println("Open your web browser and navigate to " +
-                    (SSL? "https" : "http") + "://127.0.0.1:" + PORT + '/');
+                    (SSL ? "https" : "http") + "://127.0.0.1:" + PORT + '/');
 
             ch.closeFuture().sync();
 

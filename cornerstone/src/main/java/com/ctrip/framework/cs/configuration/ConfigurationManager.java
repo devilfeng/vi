@@ -1,40 +1,35 @@
 package com.ctrip.framework.cs.configuration;
 
+import com.ctrip.framework.cs.enterprise.EnFactory;
+import com.ctrip.framework.cs.util.Tools;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Properties;
-
-/**
- * Created by jiang.j on 2016/3/30.
- */
-
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import com.ctrip.framework.cs.util.Tools;
-import com.ctrip.framework.cs.enterprise.EnFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * Created by jiang.j on 2016/3/30.
+ */
 
 public class ConfigurationManager {
 
+    static final String TEMPFILENAME = "vi_config.properties";
+    static final String PROP_NEXT_LOAD = "@next";
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
     static volatile Configuration instance = null;
     static volatile boolean customConfigurationInstalled = false;
     static PropertiesConfiguration customProperties;
-    static final String TEMPFILENAME = "vi_config.properties";
-
-    static final String PROP_NEXT_LOAD = "@next";
-    private static Map<String,Set<String>> configProMap = new HashMap<>();
+    private static Map<String, Set<String>> configProMap = new HashMap<>();
     private static boolean enableDefaultload = true;
     private static String CONFIGPATH = "config/";
-
     private static Set<String> loadedPropertiesURLs = new CopyOnWriteArraySet<>();
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
 
     static {
         try {
@@ -57,40 +52,41 @@ public class ConfigurationManager {
         }
     }
 
-    static void setEnableDefaultload(boolean enabled){
-        enableDefaultload =enabled;
+    static void setEnableDefaultload(boolean enabled) {
+        enableDefaultload = enabled;
     }
 
-    static void setConfigPath(String path){
+    static void setConfigPath(String path) {
         CONFIGPATH = path;
     }
+
     static Set<String> getLoadedPropertiesURLs() {
         return loadedPropertiesURLs;
     }
 
 
-    public static Map<String,Map<String,String>> getAllProperties() throws InitConfigurationException {
+    public static Map<String, Map<String, String>> getAllProperties() throws InitConfigurationException {
 
         if (instance == null) {
             instance = getConfigInstance();
         }
-        Map<String,Map<String,String>> allProps = new HashMap<>();
-        for(String configName:configProMap.keySet()){
-            allProps.put(configName,getPropertiesByConfigName(configName));
+        Map<String, Map<String, String>> allProps = new HashMap<>();
+        for (String configName : configProMap.keySet()) {
+            allProps.put(configName, getPropertiesByConfigName(configName));
         }
         return allProps;
     }
 
-    public static Map<String,String> getPropertiesByConfigName(String configName) throws InitConfigurationException {
+    public static Map<String, String> getPropertiesByConfigName(String configName) throws InitConfigurationException {
 
 
-        Map<String,String> pros = new HashMap<>();
+        Map<String, String> pros = new HashMap<>();
         Set<String> keys = getConfigKeys(configName);
-        if(keys==null){
+        if (keys == null) {
             return pros;
         }
 
-        for(String proKey : keys){
+        for (String proKey : keys) {
             pros.put(proKey, String.valueOf(instance.getProperty(proKey)));
         }
         return pros;
@@ -104,44 +100,44 @@ public class ConfigurationManager {
         return configProMap.get(configName);
     }
 
-    protected static void setProperties(Map<String,String> configs,String user) throws InitConfigurationException {
+    protected static void setProperties(Map<String, String> configs, String user) throws InitConfigurationException {
 
         String nowDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         if (instance == null) {
             instance = getConfigInstance();
         }
-        for(String key:configs.keySet()) {
-            if(key.startsWith("#.")){
+        for (String key : configs.keySet()) {
+            if (key.startsWith("#.")) {
                 continue;
             }
-            if(!customProperties.containsKey("$"+key)){
+            if (!customProperties.containsKey("$" + key)) {
                 customProperties.setProperty("$" + key, instance.getString(key));
             }
 
             String value = configs.get(key);
             instance.setProperty(key, value);
             customProperties.setProperty(key, value);
-            customProperties.setProperty("@"+key,user + " "+nowDate);
+            customProperties.setProperty("@" + key, user + " " + nowDate);
         }
 
         try {
             customProperties.save();
             logger.info("save custom property");
         } catch (Throwable e) {
-            logger.error("save tmp fc file failed!",e);
+            logger.error("save tmp fc file failed!", e);
         }
     }
 
     static Map<String, String> allCustomRemarks() {
-        Map<String,String> rtn = new HashMap<>();
+        Map<String, String> rtn = new HashMap<>();
         Iterator<String> keys = customProperties.getKeys();
         while (keys.hasNext()) {
             String key = keys.next();
             if (key.startsWith("@")) {
                 String realKey = key.substring(1);
-                String value =customProperties.getString("$"+realKey);
-                if(value != null && !value.equals(instance.getString(realKey))) {
-                    rtn.put(key.substring(1), customProperties.getString(key) + " from: "+value);
+                String value = customProperties.getString("$" + realKey);
+                if (value != null && !value.equals(instance.getString(realKey))) {
+                    rtn.put(key.substring(1), customProperties.getString(key) + " from: " + value);
                 }
             }
         }
@@ -168,7 +164,7 @@ public class ConfigurationManager {
     private static Configuration createDefaultConfigInstance() throws InitConfigurationException {
         PropertiesConfiguration config = new PropertiesConfiguration();
 
-        if(enableDefaultload) {
+        if (enableDefaultload) {
             try {
                 String path = CONFIGPATH;
                 loadFromJars(path, config);
@@ -177,7 +173,7 @@ public class ConfigurationManager {
                 for (String configPath : paths) {
                     String name = configPath.substring(path.length());
                     Properties props = loadCascadedProperties(configPath);
-                    addNewProps(name,props,config);
+                    addNewProps(name, props, config);
                 }
             } catch (Exception e) {
                 throw new InitConfigurationException(e);
@@ -189,16 +185,17 @@ public class ConfigurationManager {
 
     /**
      * add properties to current config and add new keys to configProMap
+     *
      * @param name
      * @param props
      * @param config
      */
-    private static void addNewProps(String name,Properties props,Configuration config){
+    private static void addNewProps(String name, Properties props, Configuration config) {
 
         Set<String> newKeys = ConfigurationUtils.loadProperties(name, props, config);
-        if(configProMap.containsKey(name)){
+        if (configProMap.containsKey(name)) {
             configProMap.get(name).addAll(newKeys);
-        }else {
+        } else {
             configProMap.put(name, newKeys);
         }
     }
@@ -207,69 +204,69 @@ public class ConfigurationManager {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Enumeration<URL> urls = loader.getResources(path);
 
-        while (urls.hasMoreElements()){
-           URL rawUrl = urls.nextElement();
-            if("jar".equals(rawUrl.getProtocol())){
+        while (urls.hasMoreElements()) {
+            URL rawUrl = urls.nextElement();
+            if ("jar".equals(rawUrl.getProtocol())) {
 
                 String urlStr = rawUrl.toString();
-                String location = urlStr.substring(urlStr.indexOf('f'),urlStr.lastIndexOf('!'));
+                String location = urlStr.substring(urlStr.indexOf('f'), urlStr.lastIndexOf('!'));
 
                 URL url = new URL(location);
-                Map<String,Properties> allProps = new HashMap<>();
-                Map<String,Properties> envProps = new HashMap<>();
+                Map<String, Properties> allProps = new HashMap<>();
+                Map<String, Properties> envProps = new HashMap<>();
                 String environment = EnFactory.getEnBase().getEnvType();
-                if(environment!=null){
-                    environment=environment.toLowerCase();
+                if (environment != null) {
+                    environment = environment.toLowerCase();
                 }
 
-                try ( ZipInputStream zip = new ZipInputStream(url.openStream())) {
+                try (ZipInputStream zip = new ZipInputStream(url.openStream())) {
                     ZipEntry ze;
                     while ((ze = zip.getNextEntry()) != null) {
 
                         String entryName = ze.getName();
-                        if (entryName.startsWith(path)&&!ze.isDirectory()){
+                        if (entryName.startsWith(path) && !ze.isDirectory()) {
                             String fname = entryName.substring(path.length());
 
                             Properties props = new Properties();
                             props.load(zip);
                             int suffixIndex = fname.lastIndexOf(".");
-                            if(suffixIndex<0){
+                            if (suffixIndex < 0) {
                                 continue;
                             }
-                            fname = fname.substring(0,suffixIndex);
+                            fname = fname.substring(0, suffixIndex);
                             int envIndex = fname.indexOf("-");
 
-                            if(envIndex>0) {
-                                String env = fname.substring(envIndex+1);
+                            if (envIndex > 0) {
+                                String env = fname.substring(envIndex + 1);
                                 fname = fname.substring(0, envIndex);
-                                if (environment != null && environment.length() > 0 && env.equals(environment) )  {
-                                    envProps.put(fname,props);
+                                if (environment != null && environment.length() > 0 && env.equals(environment)) {
+                                    envProps.put(fname, props);
                                 }
 
-                            }else {
+                            } else {
                                 allProps.put(fname, props);
                             }
                         }
                     }
 
-                    for(String name:envProps.keySet()){
+                    for (String name : envProps.keySet()) {
 
-                        if(allProps.containsKey(name)){
+                        if (allProps.containsKey(name)) {
                             Properties seleEnvProps = envProps.get(name);
-                            Enumeration<Object> keys =seleEnvProps.keys();
-                            while (keys.hasMoreElements()){
+                            Enumeration<Object> keys = seleEnvProps.keys();
+                            while (keys.hasMoreElements()) {
                                 String nowKey = String.valueOf(keys.nextElement());
                                 allProps.get(name).setProperty(nowKey, seleEnvProps.getProperty(nowKey));
                             }
 
-                        }else{
+                        } else {
 
                             addNewProps(name, envProps.get(name), config);
                         }
 
                     }
 
-                    for(String name : allProps.keySet()) {
+                    for (String name : allProps.keySet()) {
                         addNewProps(name, allProps.get(name), config);
                     }
                 }
@@ -285,8 +282,8 @@ public class ConfigurationManager {
 
         String[] dirFiles;
         InputStream dirStream = loader.getResourceAsStream(dir);
-        if(dirStream!=null) {
-            try(BufferedReader reader = new BufferedReader(new InputStreamReader(dirStream))) {
+        if (dirStream != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(dirStream))) {
                 List<String> names = new ArrayList<>();
                 String fname;
                 while ((fname = reader.readLine()) != null) {
@@ -294,31 +291,31 @@ public class ConfigurationManager {
                 }
                 dirFiles = names.toArray(new String[names.size()]);
             }
-        }else{
+        } else {
 
             URL dirUrl = loader.getResource(dir);
-            if(dirUrl == null || "".equals(dirUrl.getFile()))
+            if (dirUrl == null || "".equals(dirUrl.getFile()))
                 return paths;
 
             File configDir = new File(dirUrl.getFile());
             dirFiles = configDir.list();
         }
 
-        if(dirFiles == null){
+        if (dirFiles == null) {
             return paths;
         }
 
-        for(String fname:dirFiles){
-            if(!fname.endsWith(".properties")){
+        for (String fname : dirFiles) {
+            if (!fname.endsWith(".properties")) {
                 continue;
             }
-            fname = fname.substring(0,fname.lastIndexOf("."));
+            fname = fname.substring(0, fname.lastIndexOf("."));
             int envIndex = fname.indexOf("-");
 
-            if(envIndex>0) {
+            if (envIndex > 0) {
                 fname = fname.substring(0, envIndex);
             }
-            paths.add(dir+fname);
+            paths.add(dir + fname);
         }
 
         return paths;
@@ -335,7 +332,7 @@ public class ConfigurationManager {
                         logger.error("load temp custom properties failed!", e);
                     }
 
-                    if(customProperties!=null) {
+                    if (customProperties != null) {
                         Iterator<String> keys = customProperties.getKeys();
                         while (keys.hasNext()) {
                             String key = keys.next();
@@ -355,7 +352,7 @@ public class ConfigurationManager {
         if (instance != null) {
             // transfer listeners
             // transfer properties which are not in conflict with new configuration
-            for (Iterator<String> i = instance.getKeys(); i.hasNext();) {
+            for (Iterator<String> i = instance.getKeys(); i.hasNext(); ) {
                 String key = i.next();
                 Object value = instance.getProperty(key);
                 if (value != null && !config.containsKey(key)) {
@@ -370,6 +367,7 @@ public class ConfigurationManager {
 
     /**
      * Load properties from resource file(s) into the system wide configuration
+     *
      * @param path relative path of the resources
      * @throws IOException
      */
@@ -419,14 +417,14 @@ public class ConfigurationManager {
         }
         Properties props = getPropertiesFromFile(url);
         String environment = EnFactory.getEnBase().getEnvType();
-        if(environment!=null) {
+        if (environment != null) {
             environment = environment.toLowerCase();
         }
         if (environment != null && environment.length() > 0) {
             String envConfigFileName = configName + "-" + environment + ".properties";
             url = loader.getResource(envConfigFileName);
-            if(url==null){
-                url = loader.getResource(configName.replace("config/",environment+"-config/") +".properties");
+            if (url == null) {
+                url = loader.getResource(configName.replace("config/", environment + "-config/") + ".properties");
             }
             if (url != null) {
                 Properties envProps = getPropertiesFromFile(url);
@@ -437,7 +435,6 @@ public class ConfigurationManager {
         }
         return props;
     }
-
 
 
     /**
@@ -451,8 +448,7 @@ public class ConfigurationManager {
     }
 
 
-    private static String getConfigName(URL propertyFile)
-    {
+    private static String getConfigName(URL propertyFile) {
         String name = propertyFile.toExternalForm();
         name = name.replace('\\', '/'); // Windows
         final String scheme = propertyFile.getProtocol().toLowerCase();
@@ -484,7 +480,7 @@ public class ConfigurationManager {
     }
 
     public static Configuration getConfigFromPropertiesFile(URL startingUrl)
-    throws FileNotFoundException {
+            throws FileNotFoundException {
         return ConfigurationUtils.getConfigFromPropertiesFile(startingUrl,
                 getLoadedPropertiesURLs(), PROP_NEXT_LOAD);
     }
@@ -503,13 +499,13 @@ public class ConfigurationManager {
         }
 
         Set<String> newKeys = new HashSet<>();
-        for(String p:pros.stringPropertyNames()){
+        for (String p : pros.stringPropertyNames()) {
 
-            String newKey = "#."+p;
+            String newKey = "#." + p;
             newKeys.add(newKey);
-            instance.setProperty(newKey,pros.getProperty(p));
+            instance.setProperty(newKey, pros.getProperty(p));
         }
-        configProMap.put("#",newKeys);
+        configProMap.put("#", newKeys);
 
 
     }

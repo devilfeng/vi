@@ -9,34 +9,35 @@ public class ServerInfo {
     private String idc;
     private String url;
 
-    public void setIp(String ip){
-         this.ip = ip;
-    }
-
-    public void setIdc(String idc){
-        this.idc = idc;
-    }
-
-    public void setName(String name){
-        this.name = name;
-    }
-
-    public void setUrl(String url){
-        this.url = url;
-    }
-    public String getIp(){
+    public String getIp() {
         return ip;
     }
 
-    public String getIdc(){
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    public String getIdc() {
         return idc;
     }
 
-    public String getName(){
+    public void setIdc(String idc) {
+        this.idc = idc;
+    }
+
+    public String getName() {
         return name;
     }
 
-    public String getUrl(){
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

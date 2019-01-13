@@ -7,10 +7,15 @@ import java.util.Map;
  */
 public interface CacheCell {
     String id();
+
     boolean refresh();
-    Map<String,Object> getStatus();
+
+    Map<String, Object> getStatus();
+
     Object getByKey(String key);
+
     Iterable<String> keys();
+
     int size();
 
 }

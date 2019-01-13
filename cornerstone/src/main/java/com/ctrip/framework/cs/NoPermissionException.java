@@ -5,7 +5,7 @@ package com.ctrip.framework.cs;
  */
 public class NoPermissionException extends Exception {
 
-    public NoPermissionException(){
+    public NoPermissionException() {
         super("You do not have permission for this operation or login has expired!");
     }
 }

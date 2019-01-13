@@ -10,7 +10,7 @@ import java.util.Map;
  * Created by jiang.j on 2016/8/22.
  */
 @Ignite(id = "vi.ignite1")
-public class TestIginite1 extends AbstractIgnitePlugin{
+public class TestIginite1 extends AbstractIgnitePlugin {
     @Override
     public String helpUrl() {
 

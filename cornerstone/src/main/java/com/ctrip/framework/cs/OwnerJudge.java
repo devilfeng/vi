@@ -4,22 +4,25 @@ package com.ctrip.framework.cs;
  * Created by jiang.j on 2017/2/8.
  */
 public class OwnerJudge implements AppInfo.StatusSource {
-    private OwnerJudge(){
-
-    }
     private static OwnerJudge ownerStatusSource = new OwnerJudge();
-    public static OwnerJudge getInstance(){
-        return ownerStatusSource;
-    }
     boolean isNormal = true;
 
-    public void toNormal(){
+    private OwnerJudge() {
+
+    }
+
+    public static OwnerJudge getInstance() {
+        return ownerStatusSource;
+    }
+
+    public void toNormal() {
         isNormal = true;
     }
 
-    public void toAbnormal(){
+    public void toAbnormal() {
         isNormal = false;
     }
+
     @Override
     public boolean normal() {
         return isNormal;
