@@ -11,22 +11,22 @@ import java.io.*;
  */
 public class MyClassLoader extends ClassLoader {
 
-    ClassLoader superLoader;
+    private ClassLoader superLoader;
     public MyClassLoader(ClassLoader superLoader){
        this.superLoader = superLoader;
     }
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        if(name.startsWith("com.ctrip.framework.vi") && !name.startsWith("com.ctrip.framework.vi.metrics")) {
+        if(name.startsWith("com.ctrip.framework.cs") && !name.startsWith("com.ctrip.framework.cs.metrics")) {
             return findClass(name);
         }else{
             return this.superLoader.loadClass(name);
         }
     }
 
-    public InputStream getClassStream(String name){
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name.replace('.','/')+".class");
-        return is;
+    private InputStream getClassStream(String name){
+        InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(name.replace('.','/')+".class");
+        return inputStream;
 
     }
     @Override

@@ -12,10 +12,10 @@ public class VIClassAnnotationVisitor extends ClassVisitor {
     enum AnnotationType{
         NONE,IGNITE,COMPONENT
     }
-    AnnotationType annotationType = AnnotationType.NONE;
-    final String igniteAnnotation = "Lcom/ctrip/framework/vi/annotation/Ignite;";
-    final String componentAnnotation = "Lcom/ctrip/framework/vi/annotation/ComponentStatus;";
-    final int api;
+    private AnnotationType annotationType = AnnotationType.NONE;
+    private final String igniteAnnotation = "Lcom/ctrip/framework/cs/annotation/Ignite;";
+    private final String componentAnnotation = "Lcom/ctrip/framework/cs/annotation/ComponentStatus;";
+    private final int api;
 
     public VIClassAnnotationVisitor(int api) {
         super(api);
